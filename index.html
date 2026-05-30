@@ -1,0 +1,2253 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vibe Coding · AI 时代硬件开发的范式革命 · TuyaOpen IDE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@300;400;500;600&family=Noto+Serif+SC:wght@300;400;500;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* ============ 主题色(默认:🖋 墨水经典) ============
+       切换主题:从 references/themes.md 复制对应的 :root 块
+       整体替换这几行(--ink / --ink-rgb / --paper / --paper-rgb)
+       其他地方散落的 rgba() 都走 var(--ink-rgb) / var(--paper-rgb),无需逐处改 */
+    --ink:#0a0a0b;
+    --ink-rgb:10,10,11;
+    --paper:#f1efea;
+    --paper-rgb:241,239,234;
+    --paper-tint:#e8e5de;
+    --ink-tint:#18181a;
+
+    /* ============ 字体(跨主题固定) ============ */
+    --mono:"IBM Plex Mono",ui-monospace,monospace;
+    --serif-en:"Playfair Display","Source Serif 4",Georgia,serif;
+    --serif-body-en:"Source Serif 4",Georgia,serif;
+    --serif-zh:"Noto Serif SC",source-han-serif-sc,serif;
+    --sans-zh:"Noto Sans SC",source-han-sans-sc,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:100%;height:100%;overflow:hidden;background:var(--ink);color:var(--paper);font-family:var(--sans-zh);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+
+  /* ============ WebGL 双背景 ============ */
+  canvas.bg{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;display:block;transition:opacity 1.2s ease}
+  canvas#bg-light{opacity:0}
+  canvas#bg-dark{opacity:1}
+  body.light-bg canvas#bg-light{opacity:1}
+  body.light-bg canvas#bg-dark{opacity:0}
+  body.low-power canvas.bg{display:none!important}
+
+  /* ============ Deck 容器 + 翻页 ============ */
+  /* width: NSLIDES * 100vw，会在 JS 里动态矫正 */
+  #deck{position:fixed;inset:0;width:10000vw;height:100vh;display:flex;flex-wrap:nowrap;transition:transform .9s cubic-bezier(.77,0,.175,1);z-index:10;will-change:transform}
+  .slide{width:100vw;height:100vh;flex:0 0 100vw;position:relative;padding:6vh 6vw 10vh 6vw;display:flex;flex-direction:column;overflow:hidden}
+  .slide.light{color:var(--ink);background:var(--paper)}
+  .slide.dark{color:var(--paper);background:var(--ink)}
+
+  /* 默认页：遮罩较厚，保证文字可读 */
+  .slide::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;transition:background .7s ease}
+  .slide.light::before{background:rgba(var(--paper-rgb),.78);backdrop-filter:blur(3px)}
+  .slide.dark::before{background:rgba(var(--ink-rgb),.78);backdrop-filter:blur(3px)}
+  /* Hero 页：遮罩大幅降低，让 WebGL 背景明显透出 */
+  .slide.hero.light::before{background:rgba(var(--paper-rgb),.16);backdrop-filter:none}
+  .slide.hero.dark::before{background:rgba(var(--ink-rgb),.12);backdrop-filter:none}
+  /* Hero 页顶底微弱渐隐，保证 chrome/foot 区域可读 */
+  .slide.hero::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none}
+  .slide.hero.light::after{background:linear-gradient(180deg,rgba(var(--paper-rgb),.28) 0%,rgba(var(--paper-rgb),0) 14%,rgba(var(--paper-rgb),0) 86%,rgba(var(--paper-rgb),.28) 100%)}
+  .slide.hero.dark::after{background:linear-gradient(180deg,rgba(var(--ink-rgb),.32) 0%,rgba(var(--ink-rgb),0) 14%,rgba(var(--ink-rgb),0) 86%,rgba(var(--ink-rgb),.32) 100%)}
+
+  /* ============ Magazine chrome：顶部 meta + 底部 foot ============ */
+  .chrome{display:flex;justify-content:space-between;align-items:flex-start;font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;opacity:.7}
+  .chrome .left,.chrome .right{display:flex;gap:2.4em;align-items:center}
+  .chrome .sep{width:40px;height:1px;background:currentColor;opacity:.4}
+  .foot{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.55}
+  .foot .title{font-family:var(--serif-zh);font-weight:400;letter-spacing:.05em;text-transform:none;opacity:.75;font-size:13px}
+
+  .tag{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:.24em;text-transform:uppercase;padding:6px 14px;border:1px solid currentColor;opacity:.85}
+  .rule{width:100%;height:1px;background:currentColor;opacity:.25;margin:3vh 0}
+  .rule.v{width:1px;height:100%;margin:0}
+
+  /* ============ 字体规则 ============
+     · 衬线（Noto Serif SC / Playfair）：大标题、重点金句、数字
+     · 非衬线（Noto Sans SC）：正文描述、body、补充说明
+     · 等宽（IBM Plex Mono）：kicker、meta 小标签、foot 右侧
+  */
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.3em;text-transform:uppercase;opacity:.6;margin-bottom:2.6vh}
+  .display{font-family:var(--serif-en);font-weight:700;font-size:11vw;line-height:.92;letter-spacing:-.025em}
+  .display-zh{font-family:var(--serif-zh);font-weight:700;font-size:7.8vw;line-height:1.04;letter-spacing:-.005em}
+  .h1-zh{font-family:var(--serif-zh);font-weight:700;font-size:4.6vw;line-height:1.12;letter-spacing:-.005em}
+  .h2-zh{font-family:var(--serif-zh);font-weight:600;font-size:3.2vw;line-height:1.2;letter-spacing:0}
+  .h3-zh{font-family:var(--serif-zh);font-weight:500;font-size:1.9vw;line-height:1.35}
+  .body-zh{font-family:var(--sans-zh);font-weight:400;font-size:max(15px,1.22vw);line-height:1.75;opacity:.82;letter-spacing:.01em}
+  .body-serif{font-family:var(--serif-zh);font-weight:400;font-size:max(15px,1.3vw);line-height:1.65;opacity:.88}
+  .lead{font-family:var(--serif-zh);font-weight:400;font-size:1.9vw;line-height:1.4;opacity:.85}
+  .meta{font-family:var(--mono);font-size:max(11px,.88vw);letter-spacing:.16em;text-transform:uppercase;opacity:.6}
+  .big-num{font-family:var(--serif-en);font-weight:800;font-size:10vw;line-height:.85;letter-spacing:-.03em;font-feature-settings:"tnum"}
+  .mid-num{font-family:var(--serif-en);font-weight:700;font-size:5.5vw;line-height:.88;letter-spacing:-.02em;font-feature-settings:"tnum"}
+  .ghost{font-family:var(--serif-en);font-weight:900;font-size:34vw;line-height:.8;opacity:.06;letter-spacing:-.04em;position:absolute;font-feature-settings:"tnum"}
+  em{font-style:italic;font-family:var(--serif-en)}
+  .en{font-family:var(--serif-en);font-style:italic;font-weight:500}
+
+  /* ============ 布局工具 ============ */
+  .col{display:flex;flex-direction:column;gap:2.4vh}
+  .row{display:flex;align-items:center;gap:3vw}
+  .grid-6{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);gap:4vw 6vw;flex:1;align-content:center;padding:2vh 0}
+  .grid-9{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:3vh 4vw;flex:1;align-content:center}
+  .grid-4{display:grid;grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(2,1fr);gap:4vh 6vw;flex:1;align-content:center}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:4vw;flex:1;align-content:center}
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:4vw;flex:1;align-items:center}
+  .split-55{display:grid;grid-template-columns:55fr 45fr;gap:5vw;flex:1;align-items:stretch}
+  .fill{flex:1}
+  .center{align-items:center;justify-content:center;text-align:center}
+  .bottom-left{position:absolute;left:6vw;bottom:9vh;max-width:50vw}
+  .bottom-right{position:absolute;right:6vw;bottom:9vh;max-width:50vw;text-align:right}
+  .top-right{position:absolute;right:6vw;top:6vh;text-align:right}
+
+  /* ============ Stat（数字矩阵） ============ */
+  .stat{display:flex;flex-direction:column;gap:1vh;align-items:flex-start}
+  .stat .n{font-family:var(--serif-en);font-weight:800;font-size:8vw;line-height:.88;letter-spacing:-.03em;font-feature-settings:"tnum"}
+  .stat .l{font-family:var(--sans-zh);font-size:max(13px,1.05vw);opacity:.7;margin-top:1vh;font-weight:400;line-height:1.5}
+  .stat .m{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;opacity:.5;margin-bottom:.2vh}
+
+  /* ============ Callout（引用框） ============ */
+  .callout{padding:3vh 2.4vw;border-left:3px solid currentColor;position:relative;font-family:var(--serif-zh);font-size:max(15px,1.2vw);line-height:1.55;opacity:.92}
+  .slide.light .callout{background:rgba(var(--ink-rgb),.05)}
+  .slide.dark .callout{background:rgba(var(--paper-rgb),.06)}
+  .callout .cite{display:block;margin-top:1.6vh;font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;opacity:.6}
+  .callout .q-big{font-family:var(--serif-zh);font-weight:600;font-size:max(17px,1.6vw);line-height:1.42}
+
+  /* ============ Platform（平台卡） ============ */
+  .plat{display:flex;flex-direction:column;justify-content:flex-end;padding:2vh 0;border-top:1px solid currentColor;border-color:rgba(127,127,127,.35)}
+  .plat .name{font-family:var(--serif-zh);font-weight:700;font-size:1.8vw;margin-bottom:.6vh}
+  .plat .nb{font-family:var(--serif-en);font-weight:700;font-size:3.2vw;letter-spacing:-.02em;line-height:1;font-feature-settings:"tnum"}
+  .plat .sub{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;opacity:.55;margin-top:.6vh}
+  .plat .fill{font-family:var(--sans-zh);font-weight:300;font-size:2.4vw;opacity:.28;letter-spacing:-.01em;line-height:1}
+
+  /* ============ Rowline（表格行） ============ */
+  .rowline{display:grid;grid-template-columns:1fr 2fr 1fr;gap:2vw;padding:2.2vh 0;border-top:1px solid currentColor;align-items:center;border-color:rgba(127,127,127,.25)}
+  .rowline:last-child{border-bottom:1px solid currentColor;border-color:rgba(127,127,127,.25)}
+  .rowline .k{font-family:var(--serif-zh);font-weight:700;font-size:1.7vw}
+  .rowline .v{font-family:var(--sans-zh);font-weight:400;font-size:max(14px,1.2vw);opacity:.85;line-height:1.55}
+  .rowline .m{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;opacity:.6;justify-self:end}
+
+  /* ============ Pillar（支柱卡片） ============ */
+  .pillar{display:flex;flex-direction:column;gap:1.8vh}
+  .pillar .ic{font-family:var(--serif-en);font-style:italic;font-size:2.6vw;opacity:.45;font-weight:400}
+  .pillar .ic svg{width:2.8vw;height:2.8vw;stroke-width:1.2;opacity:.7}
+  .pillar .t{font-family:var(--serif-zh);font-weight:700;font-size:2.4vw;line-height:1.1}
+  .pillar .d{font-family:var(--sans-zh);font-weight:400;font-size:max(14px,1.1vw);opacity:.76;line-height:1.6}
+
+  /* ============ Signature / Highlight ============ */
+  .sign{font-family:var(--serif-en);font-style:italic;font-weight:500;font-size:2vw;opacity:.7}
+  .hi{position:relative;display:inline}
+  .slide.dark .hi::after{content:"";position:absolute;left:-.1em;right:-.1em;bottom:-.05em;height:.28em;background:rgba(var(--paper-rgb),.15);z-index:-1}
+  .slide.light .hi::after{content:"";position:absolute;left:-.1em;right:-.1em;bottom:-.05em;height:.28em;background:rgba(var(--ink-rgb),.08);z-index:-1}
+
+  /* ============ Icons（Lucide via CDN） ============ */
+  .ico{width:1em;height:1em;display:inline-block;vertical-align:-.12em;stroke:currentColor;fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+  .ico-lg,.ico-md,.ico-sm{fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round}
+  .ico-lg{width:2.6vw;height:2.6vw;stroke-width:1.2;display:inline-block}
+  .ico-md{width:1.8vw;height:1.8vw;stroke-width:1.3;display:inline-block;vertical-align:-.4em}
+  .ico-sm{width:1.1vw;height:1.1vw;stroke-width:1.4;display:inline-block;vertical-align:-.15em;opacity:.7}
+
+  /* ============ 图片占位（虚线框，提示设计师位置） ============ */
+  .img-slot{border:1.5px dashed rgba(127,127,127,.4);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1vh;padding:2vh 2vw;font-family:var(--mono);font-size:10px;letter-spacing:.28em;text-transform:uppercase;opacity:.55;position:relative;aspect-ratio:16/9;width:100%;max-height:56vh;margin-inline:auto;box-sizing:border-box}
+  .img-slot::before{content:"";position:absolute;inset:8px;border:1px solid currentColor;opacity:.2}
+  .img-slot .plus{font-size:2vw;font-weight:300;opacity:.5;letter-spacing:0}
+  .img-slot .label{position:relative;z-index:2;text-align:center}
+  .img-slot.r-4x3{aspect-ratio:4/3}
+  .img-slot.r-3x2{aspect-ratio:3/2}
+  .img-slot.r-1x1{aspect-ratio:1/1}
+
+  /* ============ 图片实填框（关键：固定高度 + 只裁底部） ============
+     重要约束：高度用内联 height:Nvh 精确控制，不要用 aspect-ratio（会撑破布局）
+     object-position:top center 保证严禁裁剪顶部和左右，只裁剪底部
+  */
+  .frame-img{overflow:hidden;position:relative;background:rgba(0,0,0,.04);box-sizing:border-box;width:100%;border-radius:4px}
+  .slide.dark .frame-img{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.12)}
+  .frame-img > img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block}
+  .frame-img.fit-contain > img{object-fit:contain;object-position:center center}
+  .frame-img.r-16x9{aspect-ratio:16/9;max-height:64vh}
+  .frame-img.r-16x10{aspect-ratio:16/10;max-height:56vh}
+  .frame-img.r-4x3{aspect-ratio:4/3;max-height:56vh}
+  .frame-img.r-3x2{aspect-ratio:3/2;max-height:46vh}
+  .frame-img.r-3x4{aspect-ratio:3/4;max-height:60vh}
+  .frame-img.r-1x1{aspect-ratio:1/1;max-height:50vh}
+  .frame-img.h-16{height:16vh}
+  .frame-img.h-18{height:18vh}
+  .frame-img.h-22{height:22vh}
+  .frame-img.h-26{height:26vh}
+  .frame-img.h-28{height:28vh}
+  .frame-cap{display:flex;justify-content:space-between;align-items:baseline;gap:1vw;margin-top:.8vh;font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;opacity:.72}
+  .frame-cap .pf{font-family:var(--serif-zh);font-weight:600;font-size:max(13px,1vw);letter-spacing:.04em;text-transform:none;opacity:.94}
+  .frame-cap .nb{font-family:var(--serif-en);font-style:italic;font-size:max(15px,1.2vw);letter-spacing:.02em;text-transform:none;opacity:.88}
+  .frame-cap .idx{font-family:var(--mono);opacity:.5}
+  figure.tile{display:flex;flex-direction:column;margin:0;min-width:0}
+  figure.tile > .frame-img{flex:0 0 auto}
+
+  /* ============ 导航 ============ */
+  #nav{position:fixed;left:50%;bottom:2.6vh;transform:translateX(-50%);z-index:30;display:flex;gap:10px;padding:8px 14px;border-radius:999px;background:rgba(0,0,0,.18);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  #nav .dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.3);cursor:pointer;transition:all .3s ease;border:0;padding:0}
+  #nav .dot:hover{background:rgba(255,255,255,.5);transform:scale(1.15)}
+  #nav .dot.active{background:rgba(255,255,255,.95);width:22px;border-radius:999px}
+  body.light-bg #nav{background:rgba(255,255,255,.25)}
+  body.light-bg #nav .dot{background:rgba(var(--ink-rgb),.25)}
+  body.light-bg #nav .dot.active{background:rgba(var(--ink-rgb),.9)}
+  #hint{position:fixed;bottom:3vh;right:3vw;z-index:30;font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;opacity:.4;mix-blend-mode:difference;color:#aaa}
+  body.low-power #hint{opacity:.72;color:var(--paper);mix-blend-mode:normal}
+  body.light-bg.low-power #hint{color:var(--ink)}
+  #timer-display.timer-warning{color:#ff6b35!important;opacity:.9!important;animation:timer-blink 1s infinite}
+  @keyframes timer-blink{0%,100%{opacity:.9}50%{opacity:.4}}
+  .timer-btn{font-family:var(--mono);font-size:clamp(12px,1vw,15px);padding:.8vh 1.2vw;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:var(--paper);border-radius:6px;cursor:pointer;transition:all .2s}
+  .timer-btn:hover{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.4)}
+  .timer-action{font-family:var(--sans-zh);font-size:clamp(14px,1.2vw,18px);font-weight:600;padding:1.2vh 2.5vw;background:#2196f3;border:none;color:#fff;border-radius:8px;cursor:pointer;transition:all .2s}
+  .timer-action:hover{background:#1976d2}
+
+  /* ============================================================
+     ============ LAYOUTS API · 面向 agent 的类（v2）============
+     所有 layouts.md 中的骨架都基于下面这套命名。
+     如果你在 layouts.md 里看到某个类，它必须在下面有定义。
+     ============================================================ */
+
+  /* ---------- .frame：每页主内容容器 ---------- */
+  .frame{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+  /* 当 .frame 同时加了 grid 类时，grid 的 display:grid 覆盖 flex */
+  .frame.grid-2-7-5,
+  .frame.grid-2-6-6,
+  .frame.grid-2-8-4,
+  .frame.grid-3-3,
+  .frame.grid-6{display:grid}
+
+  /* ---------- 标题层级（API 名称，衬线为主） ---------- */
+  .h-hero{
+    font-family:var(--serif-zh);
+    font-weight:900;
+    font-size:10vw;
+    line-height:.96;
+    letter-spacing:-.02em;
+  }
+  .h-xl{
+    font-family:var(--serif-zh);
+    font-weight:700;
+    font-size:6.2vw;
+    line-height:1.08;
+    letter-spacing:-.01em;
+  }
+  .h-sub{
+    font-family:var(--serif-zh);
+    font-weight:500;
+    font-size:3.1vw;
+    line-height:1.25;
+    letter-spacing:0;
+    opacity:.7;
+  }
+  .h-md{
+    font-family:var(--serif-zh);
+    font-weight:600;
+    font-size:2.3vw;
+    line-height:1.3;
+  }
+  /* 英文标题专用（Playfair 衬线） */
+  .h-hero-en,.h-xl-en{font-family:var(--serif-en);letter-spacing:-.025em}
+
+  /* ---------- lead 引语 ---------- */
+  .lead{
+    font-family:var(--serif-zh);
+    font-weight:400;
+    font-size:1.75vw;
+    line-height:1.5;
+    opacity:.86;
+  }
+
+  /* ---------- meta-row 底部元数据 ---------- */
+  .meta-row{
+    display:flex;
+    gap:1.2em;
+    align-items:baseline;
+    flex-wrap:wrap;
+    font-family:var(--mono);
+    font-size:max(12px,.92vw);
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    opacity:.6;
+  }
+
+  /* ---------- stat-card（数据大字报用） ---------- */
+  .stat-card{
+    display:flex;
+    flex-direction:column;
+    gap:.8vh;
+    align-items:flex-start;
+    padding-top:1.6vh;
+    border-top:1px solid currentColor;
+    border-color:rgba(127,127,127,.3);
+  }
+  .stat-card .stat-label{
+    font-family:var(--mono);
+    font-size:max(10px,.78vw);
+    letter-spacing:.24em;
+    text-transform:uppercase;
+    opacity:.55;
+  }
+  .stat-card .stat-nb{
+    font-family:var(--serif-en);
+    font-weight:800;
+    font-size:5.8vw;
+    line-height:.9;
+    letter-spacing:-.03em;
+    font-feature-settings:"tnum";
+    margin-top:.4vh;
+  }
+  .stat-card .stat-nb .stat-unit{
+    font-family:var(--serif-zh);
+    font-weight:500;
+    font-size:.38em;
+    letter-spacing:0;
+    opacity:.72;
+    margin-left:.14em;
+  }
+  .stat-card .stat-note{
+    font-family:var(--sans-zh);
+    font-weight:400;
+    font-size:max(13px,1.05vw);
+    line-height:1.5;
+    opacity:.72;
+    margin-top:.6vh;
+  }
+  /* 当 stat-card 用于 grid-4（2x2），数字适度放大；若页面有标题+引文在上方，可内联 style 覆盖为更小值 */
+  .grid-4 .stat-card .stat-nb{font-size:5vw}
+  /* 当只有 3 个，字也可以稍大 */
+  .grid-3 .stat-card .stat-nb{font-size:6.8vw}
+
+  /* ---------- pipeline（流水线） ---------- */
+  .pipeline-section{
+    margin-top:4.4vh;
+    padding-top:2.8vh;
+    border-top:1px dashed rgba(127,127,127,.32);
+  }
+  .pipeline-section:first-of-type{
+    border-top:0;
+    padding-top:0;
+    margin-top:3vh;
+  }
+  .pipeline-label{
+    font-family:var(--mono);
+    font-size:max(11px,.85vw);
+    letter-spacing:.24em;
+    text-transform:uppercase;
+    opacity:.62;
+    margin-bottom:2.2vh;
+  }
+  .pipeline{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:1.2vw;
+  }
+  .pipeline[data-cols="3"]{grid-template-columns:repeat(3,1fr)}
+  .pipeline[data-cols="4"]{grid-template-columns:repeat(4,1fr)}
+  .pipeline[data-cols="6"]{grid-template-columns:repeat(6,1fr)}
+  .step{
+    display:flex;
+    flex-direction:column;
+    gap:.8vh;
+    padding-top:1.4vh;
+    border-top:1px solid currentColor;
+    border-color:rgba(127,127,127,.35);
+  }
+  .step-nb{
+    font-family:var(--serif-en);
+    font-style:italic;
+    font-weight:500;
+    font-size:1.15vw;
+    opacity:.45;
+  }
+  .step-title{
+    font-family:var(--sans-zh);
+    font-weight:700;
+    font-size:1.55vw;
+    letter-spacing:.01em;
+    line-height:1.2;
+  }
+  .step-desc{
+    font-family:var(--sans-zh);
+    font-weight:400;
+    font-size:max(12px,.95vw);
+    line-height:1.45;
+    opacity:.72;
+  }
+
+  /* ---------- 网格（layouts.md 所用） ---------- */
+  /* 这些类独立挂到任何容器上都能生效，不依赖 .frame 复合选择器 */
+  .grid-2-7-5{display:grid;grid-template-columns:7fr 5fr;gap:3vw 4vh;align-items:start}
+  .grid-2-6-6{display:grid;grid-template-columns:1fr 1fr;gap:3vw 4vh;align-items:start}
+  .grid-2-8-4{display:grid;grid-template-columns:8fr 4fr;gap:3vw 4vh;align-items:start}
+  .grid-3-3{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    grid-auto-rows:minmax(0,1fr);
+    gap:2.4vh 2vw;
+  }
+  /* grid-6 已在旧样式里定义为 3x2，这里仅补 align */
+
+  /* ---------- 图片 frame-img（layouts.md 主命名） ---------- */
+  /* 在旧样式里已定义，这里补 img-cap 命名别名与增强 */
+  figure.frame-img{margin:0;display:flex;flex-direction:column;min-width:0}
+  .img-cap{
+    display:block;
+    margin-top:.8vh;
+    font-family:var(--mono);
+    font-size:max(10px,.8vw);
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    opacity:.6;
+  }
+  /* callout src 命名别名 */
+  .callout-src{
+    display:block;
+    margin-top:1.6vh;
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.2em;
+    text-transform:uppercase;
+    opacity:.6;
+  }
+
+  /* ---------- chrome & foot 补位（layouts.md 简单写法） ---------- */
+  .chrome{font-family:var(--mono);font-size:max(11px,.78vw);letter-spacing:.2em;text-transform:uppercase;opacity:.62}
+  .foot{font-family:var(--mono);font-size:max(11px,.78vw);letter-spacing:.18em;text-transform:uppercase;opacity:.5}
+
+  /* ============ 动效系统(Motion One 驱动) ============
+     所有 [data-anim] 元素默认隐藏,进入页面时由 JS 逐个揭示。
+     - cascade(默认):按 DOM 顺序 stagger 120ms 淡入 + y:16→0
+     - hero(hero 页自动):慢一点的 stagger 180ms
+     - quote(含 [data-anim="line"]):逐行 600ms 淡入
+     - directional(含 [data-anim="left|right"]):左→分隔线→右
+     - pipeline(data-animate="pipeline"):Space/→ 手动推进
+     Motion One 没加载成功时(CDN 断 + 本地丢),所有 [data-anim] 会兜底显示。
+  */
+  [data-anim]{opacity:1}
+  body.motion-ready [data-anim]{opacity:0}
+  body.motion-ready [data-anim="left"]{transform:translateX(-24px)}
+  body.motion-ready [data-anim="right"]{transform:translateX(24px)}
+  body.motion-ready [data-anim="line"]{opacity:0;transform:translateY(10px)}
+  body.motion-ready [data-animate="pipeline"] [data-anim]{opacity:.15}
+  body.low-power #deck{transition:none!important}
+  body.low-power *,
+  body.low-power *::before,
+  body.low-power *::after{animation:none!important;transition:none!important}
+  body.low-power.motion-ready [data-anim],
+  body.low-power [data-anim]{opacity:1!important;transform:none!important}
+
+  /* ---------- 响应式降级 ---------- */
+  @media (max-width:900px){
+    .display{font-size:16vw}
+    .display-zh{font-size:12vw}
+    .h1-zh{font-size:7vw}
+    .h-hero{font-size:14vw}
+    .h-xl{font-size:9vw}
+    .pipeline{grid-template-columns:repeat(2,1fr)}
+    .grid-2-7-5,.grid-2-6-6,.grid-2-8-4{grid-template-columns:1fr}
+  }
+
+  /* Glitch / Cyberpunk jitter effect */
+  .glitch-text {
+    animation: glitch-skew 4s infinite linear alternate-reverse;
+  }
+
+  /* Vibe Coding floating + gradient shift */
+  @keyframes vibe-gradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  @keyframes vibe-drift {
+    0%,100% { transform: translateY(0) rotate(0deg); }
+    25% { transform: translateY(-3px) rotate(-0.5deg); }
+    50% { transform: translateY(2px) rotate(0.3deg); }
+    75% { transform: translateY(-2px) rotate(-0.3deg); }
+  }
+
+  .glitch-text::before,
+  .glitch-text::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .glitch-text::before {
+    color: #00ffff;
+    animation: glitch-top 3s infinite linear alternate-reverse;
+    clip-path: inset(0 0 60% 0);
+    text-shadow: -2px 0 #ff00ff;
+  }
+
+  .glitch-text::after {
+    color: #ff00ff;
+    animation: glitch-bottom 2.5s infinite linear alternate-reverse;
+    clip-path: inset(60% 0 0 0);
+    text-shadow: 2px 0 #00ffff;
+  }
+
+  @keyframes glitch-top {
+    0%,100% { transform: translate(0); }
+    2% { transform: translate(3px, -1px); }
+    4% { transform: translate(-2px, 1px); }
+    6% { transform: translate(0); }
+    42% { transform: translate(0); }
+    44% { transform: translate(-4px, -1px) skewX(-2deg); }
+    46% { transform: translate(2px, 1px); }
+    48% { transform: translate(0); }
+    82% { transform: translate(0); }
+    84% { transform: translate(2px, -2px) skewX(3deg); }
+    86% { transform: translate(-1px, 1px); }
+    88% { transform: translate(0); }
+  }
+
+  @keyframes glitch-bottom {
+    0%,100% { transform: translate(0); }
+    8% { transform: translate(-3px, 2px); }
+    10% { transform: translate(2px, -1px) skewX(2deg); }
+    12% { transform: translate(0); }
+    52% { transform: translate(0); }
+    54% { transform: translate(3px, 1px) skewX(-1deg); }
+    56% { transform: translate(-2px, -1px); }
+    58% { transform: translate(0); }
+    72% { transform: translate(0); }
+    74% { transform: translate(-2px, 2px); }
+    76% { transform: translate(3px, -1px) skewX(2deg); }
+    78% { transform: translate(0); }
+  }
+
+  @keyframes glitch-skew {
+    0%,100% { transform: skew(0deg); }
+    20% { transform: skew(0deg); }
+    21% { transform: skew(-1deg); }
+    22% { transform: skew(0deg); }
+    60% { transform: skew(0deg); }
+    61% { transform: skew(0.5deg); }
+    62% { transform: skew(0deg); }
+  }
+</style>
+</head>
+<body>
+<script>
+  (function(){
+    const KEY = 'guizang-ppt-low-power';
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const stored = localStorage.getItem(KEY);
+    window.__lowPowerMode = stored === '1' || (stored === null && reduced);
+    function updateHint(){
+      const hint = document.getElementById('hint');
+      if(hint) hint.textContent = `← → 翻页 · B ${window.__lowPowerMode ? '动态' : '静态'} · ESC 索引`;
+    }
+    window.__setLowPowerMode = function(on, opts={}){
+      window.__lowPowerMode = !!on;
+      document.body.classList.toggle('low-power', window.__lowPowerMode);
+      if(opts.persist !== false) localStorage.setItem(KEY, window.__lowPowerMode ? '1' : '0');
+      if(window.__lowPowerMode && document.getAnimations){
+        document.getAnimations().forEach(a=>a.cancel());
+      }
+      updateHint();
+      dispatchEvent(new CustomEvent('ppt-low-power-change', {detail:{on:window.__lowPowerMode}}));
+      if(window.__playSlide) window.__playSlide(window.__currentSlideIndex || 0);
+    };
+    document.body.classList.toggle('low-power', window.__lowPowerMode);
+    addEventListener('DOMContentLoaded', updateHint, {once:true});
+  })();
+
+  // =============== 演讲倒计时 ===============
+  (function(){
+    let totalSec = 60 * 60;
+    let remaining = totalSec;
+    let running = false;
+    let interval = null;
+
+    function fmt(sec){
+      const m = Math.floor(Math.abs(sec) / 60);
+      const s = Math.abs(sec) % 60;
+      const sign = sec < 0 ? '-' : '';
+      return sign + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+    }
+
+    function updateDisplay(){
+      const val = document.getElementById('timer-value');
+      const modal = document.getElementById('timer-modal-display');
+      const display = document.getElementById('timer-display');
+      const ring = document.getElementById('timer-ring-progress');
+      if(val) val.textContent = fmt(remaining);
+      if(modal) modal.textContent = fmt(remaining);
+      if(display){
+        if(remaining <= 300 && remaining > 0) display.classList.add('timer-warning');
+        else display.classList.remove('timer-warning');
+      }
+      if(ring){
+        const circumference = 2 * Math.PI * 9;
+        const progress = totalSec > 0 ? Math.max(0, remaining / totalSec) : 0;
+        ring.setAttribute('stroke-dasharray', String(circumference));
+        ring.setAttribute('stroke-dashoffset', String(circumference * (1 - progress)));
+        if(remaining <= 300 && remaining > 0) ring.setAttribute('stroke', '#ff6b35');
+        else if(remaining <= 0) ring.setAttribute('stroke', '#f44336');
+        else ring.setAttribute('stroke', '#fff');
+      }
+      const btn = document.getElementById('timer-start-btn');
+      if(btn) btn.textContent = running ? '暂停' : '开始';
+    }
+
+    window.timerSet = function(min){
+      totalSec = min * 60;
+      remaining = totalSec;
+      updateDisplay();
+    };
+
+    window.timerAdd = function(min){
+      remaining += min * 60;
+      if(remaining < 0) remaining = 0;
+      totalSec = remaining;
+      updateDisplay();
+    };
+
+    window.timerToggle = function(){
+      if(running){
+        running = false;
+        clearInterval(interval);
+      } else {
+        running = true;
+        interval = setInterval(function(){
+          remaining--;
+          updateDisplay();
+          if(remaining <= -600){
+            clearInterval(interval);
+            running = false;
+            updateDisplay();
+          }
+        }, 1000);
+      }
+      updateDisplay();
+    };
+
+    window.timerReset = function(){
+      running = false;
+      clearInterval(interval);
+      remaining = totalSec;
+      updateDisplay();
+    };
+
+    window.timerStart = function(){
+      if(running) return;
+      running = true;
+      interval = setInterval(function(){
+        remaining--;
+        updateDisplay();
+        if(remaining <= -600){
+          clearInterval(interval);
+          running = false;
+          updateDisplay();
+        }
+      }, 1000);
+      updateDisplay();
+    };
+
+    updateDisplay();
+
+    document.addEventListener('fullscreenchange', function(){
+      if(document.fullscreenElement) window.timerStart();
+    });
+    document.addEventListener('webkitfullscreenchange', function(){
+      if(document.webkitFullscreenElement) window.timerStart();
+    });
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'F11') window.timerStart();
+    });
+  })();
+</script>
+
+<canvas id="bg-dark" class="bg"></canvas>
+<canvas id="bg-light" class="bg"></canvas>
+<div id="timer-display" style="position:fixed;bottom:3vh;left:3vw;z-index:30;font-family:var(--mono);font-size:13px;letter-spacing:.12em;opacity:.6;color:rgba(255,255,255,.8);cursor:pointer;user-select:none" onclick="document.getElementById('timer-modal').style.display='flex'">
+  <span id="timer-value">60:00</span>
+</div>
+<div id="timer-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);align-items:center;justify-content:center" onclick="if(event.target===this)this.style.display='none'">
+  <div style="background:var(--ink);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:4vh 4vw;min-width:320px;color:var(--paper);font-family:var(--sans-zh)">
+    <div style="font-family:var(--serif-zh);font-size:1.6vw;font-weight:700;margin-bottom:3vh">演讲倒计时</div>
+    <div style="text-align:center;font-family:var(--mono);font-size:5vw;font-weight:700;letter-spacing:.05em;margin-bottom:3vh" id="timer-modal-display">60:00</div>
+    <div style="display:flex;gap:1vw;justify-content:center;margin-bottom:2.5vh;flex-wrap:wrap">
+      <button class="timer-btn" onclick="timerSet(15)">15 min</button>
+      <button class="timer-btn" onclick="timerSet(30)">30 min</button>
+      <button class="timer-btn" onclick="timerSet(45)">45 min</button>
+      <button class="timer-btn" onclick="timerSet(60)">60 min</button>
+      <button class="timer-btn" onclick="timerSet(90)">90 min</button>
+    </div>
+    <div style="display:flex;gap:1vw;justify-content:center;margin-bottom:2.5vh">
+      <button class="timer-btn" onclick="timerAdd(-5)">-5 min</button>
+      <button class="timer-btn" onclick="timerAdd(-1)">-1 min</button>
+      <button class="timer-btn" onclick="timerAdd(1)">+1 min</button>
+      <button class="timer-btn" onclick="timerAdd(5)">+5 min</button>
+      <button class="timer-btn" onclick="timerAdd(10)">+10 min</button>
+    </div>
+    <div style="display:flex;gap:1.5vw;justify-content:center">
+      <button class="timer-action" id="timer-start-btn" onclick="timerToggle()">开始</button>
+      <button class="timer-action" style="background:transparent;border:1px solid rgba(255,255,255,.3)" onclick="timerReset()">重置</button>
+    </div>
+  </div>
+</div>
+<div id="hint">← → 翻页 · B 静态 · ESC 索引</div>
+
+<!-- Global logo · top-left on every page -->
+<img id="global-logo" src="images/logo-tuya.png" alt="Tuya" style="display:none">
+
+<div id="deck">
+
+<!-- ============================================================
+     SLIDES 插入区 · 在此处填充所有 <section class="slide ..."> 页面
+     每页模板参考 references/page-patterns.md
+     页面组件参考 references/components.md
+     ============================================================ -->
+
+<!-- ===== 01 · Cover ===== -->
+<section class="slide hero dark">
+  <div class="chrome">
+    <div>TuyaOpen IDE · 赖宣翰</div>
+    <div>Vol.01</div>
+  </div>
+  <div class="frame" style="display:grid; gap:4vh; align-content:center; min-height:80vh">
+    <div class="kicker" data-anim>Vibe Coding · 产品发布</div>
+    <h1 class="h-hero" style="font-size:clamp(42px,5.8vw,108px)" data-anim>AI 时代<br/>硬件开发的<br/>范式革命</h1>
+    <h2 class="h-sub" style="font-size:clamp(16px,2.4vw,42px)" data-anim>TuyaOpen IDE — Vibe Coding · Hardware-in-the-Loop · Ship Faster</h2>
+    <div data-anim style="display:flex;align-items:center;gap:2vw;margin-top:2vh">
+      <img src="images/speaker.png" style="width:100px;height:100px;border-radius:50%;object-fit:cover;flex-shrink:0">
+      <div style="display:flex;flex-direction:column;gap:.6vh">
+        <div style="font-family:var(--serif),var(--serif-zh);font-size:max(22px,1.8vw);font-weight:700;line-height:1.2">赖宣翰</div>
+        <div style="font-family:var(--sans);font-size:max(16px,1.1vw);opacity:.75;line-height:1.4">涂鸦开发者生态负责人</div>
+        <div style="font-family:var(--mono);font-size:max(14px,.9vw);opacity:.5;letter-spacing:.1em">2026.05.29</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot">
+    <div>30 分钟演讲 + 30 分钟 Workshop</div>
+    <div>→ swipe / arrow keys</div>
+  </div>
+</section>
+
+<!-- ===== 02 · Industry Contrast ===== -->
+<section class="slide light">
+  <div class="chrome">
+    <div>行业现状 · The Gap</div>
+    <div>Act I · 02 / 21</div>
+  </div>
+  <div class="frame" style="padding-top:6vh">
+    <div class="kicker" data-anim>一个残酷的对比</div>
+    <h2 class="h-xl" data-anim>AI 颠覆了软件<br/>硬件还在 20 年前</h2>
+    <p class="lead" style="margin-bottom:5vh" data-anim>全球 AIoT 市场 2026 年将达 1.5 万亿美元，但硬件开发效率比软件低 10-20 倍。<span style="font-family:var(--mono);font-size:max(9px,.7vw);letter-spacing:.1em;opacity:.45"> — IoT Analytics 2025</span></p>
+    <div class="grid-3" style="margin-top:4vh">
+      <div class="stat-card" data-anim>
+        <div class="stat-label">Software</div>
+        <div class="stat-nb" style="color:#4caf50">1 <span class="stat-unit">周</span></div>
+        <div class="stat-note">用 Cursor/Claude 写一个 SaaS 应用上线</div>
+        <div style="font-family:var(--mono);font-size:max(9px,.7vw);letter-spacing:.12em;opacity:.4;margin-top:.8vh">— 内部工程效率测算</div>
+      </div>
+      <div class="stat-card" data-anim>
+        <div class="stat-label" style="color:#e53935">但是硬件要：</div>
+        <div class="stat-nb" style="color:#e53935">1 <span class="stat-unit">月+</span></div>
+        <div class="stat-note">做一个最简单的联网温湿度传感器</div>
+        <div style="font-family:var(--mono);font-size:max(9px,.7vw);letter-spacing:.12em;opacity:.4;margin-top:.8vh">— 内部工程效率测算</div>
+      </div>
+      <div class="stat-card accent-top" data-anim>
+        <div class="stat-label">Failure Rate</div>
+        <div class="stat-nb" style="color:#e53935">90<span class="stat-unit">%</span></div>
+        <div class="stat-note" style="color:#e53935">硬件项目死在原型到量产的路上</div>
+        <div style="font-family:var(--mono);font-size:max(9px,.7vw);letter-spacing:.12em;opacity:.4;margin-top:.8vh">— CB Insights Hardware Report</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot">
+    <div>软件 1 人 1 周 vs 硬件 1 人 1 月 — 10x 效率差距</div>
+    <div>— · —</div>
+  </div>
+</section>
+
+<!-- ===== 03 · Three Trends ===== -->
+<section class="slide light">
+  <div class="chrome">
+    <div>行业趋势 · Trends</div>
+    <div>Act I · 03 / 21</div>
+  </div>
+  <div class="frame" style="padding-top:6vh">
+    <div class="kicker" data-anim>三大不可逆趋势</div>
+    <h2 class="h-xl" data-anim>矛盾正在激化</h2>
+    <p class="lead" style="margin-bottom:5vh" data-anim>能力在爆发，工具没跟上。</p>
+    <div class="grid-3" style="margin-top:4vh">
+      <div class="stat-card" data-anim>
+        <div class="stat-label">AI Penetration</div>
+        <div class="stat-nb">&lt;5<span class="stat-unit">%</span></div>
+        <div class="stat-note">大模型编码能力已接近中级工程师，但硬件领域 AI 渗透率不足 5%</div>
+        <div style="font-family:var(--mono);font-size:max(9px,.7vw);letter-spacing:.12em;opacity:.4;margin-top:.8vh">— McKinsey AI Survey 2025</div>
+      </div>
+      <div class="stat-card" data-anim>
+        <div class="stat-label">New Chips / Year</div>
+        <div class="stat-nb">100<span class="stat-unit">+</span></div>
+        <div class="stat-note">每年新增 100+ 款 IoT 芯片，没有统一的开发工具和抽象层</div>
+        <div style="font-family:var(--mono);font-size:max(9px,.7vw);letter-spacing:.12em;opacity:.4;margin-top:.8vh">— IC Insights 2025</div>
+      </div>
+      <div class="stat-card accent-top" data-anim>
+        <div class="stat-label">Talent Gap</div>
+        <div class="stat-nb">10M<span class="stat-unit">+</span></div>
+        <div class="stat-note">智能设备需要全栈能力，全栈硬件工程师缺口超 1000 万</div>
+        <div style="font-family:var(--mono);font-size:max(9px,.7vw);letter-spacing:.12em;opacity:.4;margin-top:.8vh">— 中国电子信息产业发展研究院</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot">
+    <div>AI 能力爆发 × 芯片碎片化 × 全栈化要求</div>
+    <div>— · —</div>
+  </div>
+</section>
+
+<!-- ===== 04 · Timeline ===== -->
+<section class="slide light">
+  <div class="chrome">
+    <div>历史演进 · Evolution</div>
+    <div>Act I · 04 / 21</div>
+  </div>
+  <div class="frame" style="padding-top:4vh">
+    <div class="kicker" data-anim>硬件开发正处于"前夜"</div>
+    <h2 class="h-xl" data-anim>每个时代都需要一个 IDE</h2>
+    <p class="lead" style="margin-bottom:6vh" data-anim>我们需要一个为 AI 设计的硬件开发 IDE。</p>
+
+    <!-- Timeline with arrows -->
+    <div data-anim style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:4vh;align-items:stretch">
+      <!-- Node 1 -->
+      <div style="display:flex;flex-direction:column;gap:1.2vh;padding:2.4vh 1.6vw;background:var(--paper-tint);position:relative">
+        <div style="font-family:var(--mono);font-size:max(14px,1vw);font-weight:600;letter-spacing:.04em;opacity:.5">2000</div>
+        <div style="font-family:var(--serif),var(--serif-zh);font-weight:700;font-size:max(17px,1.4vw);line-height:1.2">PC 软件时代</div>
+        <div style="font-family:var(--sans);font-size:max(14px,.9vw);opacity:.7;line-height:1.5">Visual Studio 统一了开发工具</div>
+        <div style="position:absolute;right:-12px;top:50%;transform:translateY(-50%);width:0;height:0;border-top:12px solid transparent;border-bottom:12px solid transparent;border-left:12px solid var(--paper-tint);z-index:2"></div>
+      </div>
+      <!-- Node 2 -->
+      <div style="display:flex;flex-direction:column;gap:1.2vh;padding:2.4vh 1.6vw;background:var(--paper-tint);position:relative;margin-left:2px">
+        <div style="font-family:var(--mono);font-size:max(14px,1vw);font-weight:600;letter-spacing:.04em;opacity:.5">2010</div>
+        <div style="font-family:var(--serif),var(--serif-zh);font-weight:700;font-size:max(17px,1.4vw);line-height:1.2">移动互联网</div>
+        <div style="font-family:var(--sans);font-size:max(14px,.9vw);opacity:.7;line-height:1.5">Android Studio / Xcode 统一了开发体验</div>
+        <div style="position:absolute;right:-12px;top:50%;transform:translateY(-50%);width:0;height:0;border-top:12px solid transparent;border-bottom:12px solid transparent;border-left:12px solid var(--paper-tint);z-index:2"></div>
+      </div>
+      <!-- Node 3 -->
+      <div style="display:flex;flex-direction:column;gap:1.2vh;padding:2.4vh 1.6vw;background:var(--paper-tint);position:relative;margin-left:2px">
+        <div style="font-family:var(--mono);font-size:max(14px,1vw);font-weight:600;letter-spacing:.04em;opacity:.5">2020</div>
+        <div style="font-family:var(--serif),var(--serif-zh);font-weight:700;font-size:max(17px,1.4vw);line-height:1.2">云原生时代</div>
+        <div style="font-family:var(--sans);font-size:max(14px,.9vw);opacity:.7;line-height:1.5">VS Code 成为全栈开发标准</div>
+        <div style="position:absolute;right:-12px;top:50%;transform:translateY(-50%);width:0;height:0;border-top:12px solid transparent;border-bottom:12px solid transparent;border-left:12px solid var(--paper-tint);z-index:2"></div>
+      </div>
+      <!-- Node 4 · COLORFUL HIGHLIGHT -->
+      <div style="display:flex;flex-direction:column;gap:1.2vh;padding:2.4vh 1.6vw;background:linear-gradient(135deg,#ff6b35 0%,#e91e63 30%,#9c27b0 60%,#2196f3 100%);color:#fff;position:relative;margin-left:2px">
+        <div style="font-family:var(--mono);font-size:max(14px,1vw);font-weight:600;letter-spacing:.04em;opacity:.85;color:#fff">2025</div>
+        <div style="font-family:var(--serif),var(--serif-zh);font-weight:700;font-size:max(17px,1.4vw);line-height:1.2;color:#fff">AIoT 时代</div>
+        <div style="font-family:var(--sans);font-size:max(14px,.9vw);opacity:.95;line-height:1.5;color:#fff">TuyaOpen IDE — 为 AI 设计的硬件 IDE</div>
+      </div>
+    </div>
+
+  </div>
+  <div class="foot">
+    <div>每 10 年，开发工具都会被重新定义</div>
+    <div>— · —</div>
+  </div>
+</section>
+
+<!-- ===== 05 · Competitor Comparison ===== -->
+<section class="slide light">
+  <div class="chrome">
+    <div>工具对比 · Comparison</div>
+    <div>Act I · 05 / 21</div>
+  </div>
+  <div class="frame" style="padding-top:4vh">
+    <div class="kicker" data-anim>现有工具的局限</div>
+    <h2 class="h-xl" data-anim>为什么需要新 IDE？</h2>
+    <p class="lead" style="margin-bottom:4vh" data-anim>每个工具只解决了一部分问题，没有人做到全栈 + AI 原生。</p>
+    <div data-anim style="margin-top:3vh;overflow:hidden">
+      <table style="width:100%;border-collapse:collapse;font-family:var(--sans-zh);font-size:max(13px,1.1vw);line-height:1.6">
+        <thead>
+          <tr style="border-bottom:2px solid rgba(10,10,11,.2)">
+            <th style="text-align:left;padding:1.5vh 1vw;font-family:var(--mono);font-size:max(11px,.9vw);letter-spacing:.15em;text-transform:uppercase;opacity:.6;font-weight:400">能力维度</th>
+            <th style="text-align:center;padding:1.5vh 1vw;font-weight:600">Keil / IAR</th>
+            <th style="text-align:center;padding:1.5vh 1vw;font-weight:600">Arduino IDE</th>
+            <th style="text-align:center;padding:1.5vh 1vw;font-weight:600">PlatformIO</th>
+            <th style="text-align:center;padding:1.5vh 1vw;font-weight:700;background:linear-gradient(135deg,rgba(255,107,53,.1),rgba(33,150,243,.1))">TuyaOpen IDE</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid rgba(10,10,11,.08)">
+            <td style="padding:1.5vh 1vw;font-weight:500">AI 原生</td>
+            <td style="text-align:center;padding:1.5vh 1vw;opacity:.5">—</td>
+            <td style="text-align:center;padding:1.5vh 1vw;opacity:.5">—</td>
+            <td style="text-align:center;padding:1.5vh 1vw;opacity:.5">—</td>
+            <td style="text-align:center;padding:1.5vh 1vw;color:#4caf50;font-weight:700">✓ 硬件感知 AI</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(10,10,11,.08)">
+            <td style="padding:1.5vh 1vw;font-weight:500">全栈覆盖</td>
+            <td style="text-align:center;padding:1.5vh 1vw;opacity:.6">仅固件</td>
+            <td style="text-align:center;padding:1.5vh 1vw;opacity:.6">仅固件</td>
+            <td style="text-align:center;padding:1.5vh 1vw;opacity:.6">仅固件</td>
+            <td style="text-align:center;padding:1.5vh 1vw;color:#4caf50;font-weight:700">✓ 固件+云+App</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(10,10,11,.08)">
+            <td style="padding:1.5vh 1vw;font-weight:500">环境配置</td>
+            <td style="text-align:center;padding:1.5vh 1vw;color:#e53935">手动 · 复杂</td>
+            <td style="text-align:center;padding:1.5vh 1vw;color:#ff9800">半自动</td>
+            <td style="text-align:center;padding:1.5vh 1vw;color:#ff9800">半自动</td>
+            <td style="text-align:center;padding:1.5vh 1vw;color:#4caf50;font-weight:700">✓ 零配置</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(10,10,11,.08)">
+            <td style="padding:1.5vh 1vw;font-weight:500">云端集成</td>
+            <td style="text-align:center;padding:1.5vh 1vw;opacity:.5">—</td>
+            <td style="text-align:center;padding:1.5vh 1vw;opacity:.5">—</td>
+            <td style="text-align:center;padding:1.5vh 1vw;opacity:.5">—</td>
+            <td style="text-align:center;padding:1.5vh 1vw;color:#4caf50;font-weight:700">✓ 内置涂鸦云</td>
+          </tr>
+          <tr>
+            <td style="padding:1.5vh 1vw;font-weight:500">开源</td>
+            <td style="text-align:center;padding:1.5vh 1vw;color:#e53935">闭源</td>
+            <td style="text-align:center;padding:1.5vh 1vw;color:#4caf50">✓</td>
+            <td style="text-align:center;padding:1.5vh 1vw;color:#4caf50">✓</td>
+            <td style="text-align:center;padding:1.5vh 1vw;color:#4caf50;font-weight:700">✓ Apache 2.0</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="foot">
+    <div>现有工具只解决了 20% 的问题 — 我们解决 100%</div>
+    <div>— · —</div>
+  </div>
+</section>
+
+<!-- ===== 06 · Chapter: Pain Points ===== -->
+<section class="slide hero dark">
+  <div class="chrome">
+    <div>第二幕 · 痛点剖析</div>
+    <div>Act II · 06 / 21</div>
+  </div>
+  <div class="frame" style="display:grid; gap:6vh; align-content:center; min-height:80vh">
+    <div class="kicker" data-anim>Act II</div>
+    <h1 class="h-hero" style="font-size:8vw" data-anim>隐形<span class="glitch-text" style="color:#e53935;display:inline-block;position:relative" data-text="痛苦">痛苦</span></h1>
+    <p class="lead" style="max-width:55vw" data-anim>
+      作为硬件开发者，你每天都在经历的四大核心痛点。
+    </p>
+  </div>
+  <div class="foot">
+    <div>80% 的时间都在做重复、机械、没有创造性的工作</div>
+    <div>— · —</div>
+  </div>
+</section>
+
+<!-- ===== 06 · Pain Points 1+2 ===== -->
+<section class="slide dark">
+  <div class="chrome">
+    <div>痛点 · Pain Points</div>
+    <div>Act II · 07 / 21</div>
+  </div>
+  <div class="frame" style="padding-top:4vh">
+    <div class="kicker" data-anim>环境与 AI 的双重困境</div>
+    <h2 class="h-xl" data-anim>配置地狱 × AI 盲区</h2>
+    <p class="lead" style="margin-bottom:4vh" data-anim>新工程师入职花一周配环境；让 ChatGPT 写驱动，10 版没一版能编译。</p>
+    <div class="pipeline" data-cols="3" style="margin-top:4vh">
+      <div class="step accent-top" data-anim>
+        <div class="step-nb" style="color:#e53935">痛点 1</div>
+        <div class="step-title" style="color:#e53935">环境配置地狱</div>
+        <div class="step-desc">每个芯片都有自己的工具链和 SDK 版本。平均花费 15-20 个工作日。</div>
+      </div>
+      <div class="step accent-top" data-anim>
+        <div class="step-nb" style="color:#e53935">痛点 2</div>
+        <div class="step-title" style="color:#e53935">AI 的"硬件盲"</div>
+        <div class="step-desc">通用 AI 不懂你的板子、引脚定义和 DP 协议。没有硬件上下文的 AI 几乎无用。</div>
+      </div>
+      <div class="step" data-anim>
+        <div class="step-nb" style="color:#4caf50">结论</div>
+        <div class="step-title" style="color:#4caf50">需要硬件感知</div>
+        <div class="step-desc">AI 必须理解具体的硬件上下文，才能生成可用的嵌入式代码。</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot">
+    <div>没有硬件上下文的 AI — 对嵌入式开发几乎无用</div>
+    <div>— · —</div>
+  </div>
+</section>
+
+<!-- ===== 07 · Pain Points 3+4 ===== -->
+<section class="slide dark">
+  <div class="chrome">
+    <div>痛点 · Pain Points</div>
+    <div>Act II · 08 / 21</div>
+  </div>
+  <div class="frame" style="padding-top:4vh">
+    <div class="kicker" data-anim>工具碎片化与能力断层</div>
+    <h2 class="h-xl" data-anim><span style="color:#e53935">切换灾难</span> × <span style="color:#ff6b35">全栈困局</span></h2>
+    <p class="lead" style="margin-bottom:4vh" data-anim>一天切换 <strong style="color:#e53935">5 个工具 50 次</strong>；<strong style="color:#ff6b35">3 人团队</strong>才能做一个完整产品。</p>
+    <div class="grid-3" style="margin-top:4vh">
+      <div class="stat-card" data-anim>
+        <div class="stat-label">Daily Switches</div>
+        <div class="stat-nb" style="color:#e53935">50<span class="stat-unit">+</span></div>
+        <div class="stat-note"><span style="opacity:.6">Keil</span> + <span style="opacity:.6">串口</span> + <span style="opacity:.6">云平台</span> + <span style="opacity:.6">APP 开发</span> + <span style="opacity:.6">Postman</span>，<strong>注意力严重分散</strong></div>
+      </div>
+      <div class="stat-card" data-anim>
+        <div class="stat-label">Min Team Size</div>
+        <div class="stat-nb" style="color:#ff6b35">3 <span class="stat-unit">人</span></div>
+        <div class="stat-note"><strong>嵌入式</strong> + <strong>后端</strong> + <strong>前端</strong>，缺一不可</div>
+      </div>
+      <div class="stat-card accent-top" data-anim>
+        <div class="stat-label">Solo Devs Blocked</div>
+        <div class="stat-nb" style="color:#e53935">90<span class="stat-unit">%</span></div>
+        <div class="stat-note">个人开发者<strong style="color:#e53935">无法完成</strong>完整智能硬件产品</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot">
+    <div>硬件 + 固件 + 云 + App — 四个领域完全割裂</div>
+    <div>— · —</div>
+  </div>
+</section>
+
+<!-- ===== 08 · Chapter: Our Answer ===== -->
+<section class="slide hero dark" id="slide-firework">
+  <canvas id="firework-canvas" style="position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;filter:blur(5px)"></canvas>
+  <div class="chrome" style="position:relative;z-index:2">
+    <div>第三幕 · 产品发布</div>
+    <div>Act III · 09 / 21</div>
+  </div>
+  <div class="frame" style="display:grid; gap:5vh; align-content:center; min-height:76vh; padding-top:2vh;position:relative;z-index:2">
+    <div class="kicker" data-anim>Act III · Our Answer</div>
+    <h1 class="h-hero" style="font-size:7vw;line-height:1.15;padding-bottom:.1em;background:linear-gradient(135deg,#ff6b35 0%,#e91e63 25%,#9c27b0 50%,#2196f3 75%,#00bcd4 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text" data-anim>TuyaOpen IDE</h1>
+    <p class="lead" style="max-width:60vw" data-anim>
+      世界上第一个为 AI 时代设计的全栈硬件开发工具。
+    </p>
+    <figure class="frame-img fit-contain" style="height:38vh;margin-top:calc(3vh - 25px);background:transparent" data-anim>
+      <img src="images/mainIDE .png" alt="TuyaOpen IDE">
+    </figure>
+  </div>
+  <div class="foot" style="position:relative;z-index:2">
+    <div>VS Code 原生扩展 + 硬件上下文同步 + 全栈一体化工作流</div>
+    <div>— · —</div>
+  </div>
+</section>
+
+<!-- ===== 09 · Breakthrough 1: Vibe Coding ===== -->
+<section class="slide dark">
+  <div class="chrome">
+    <div>突破 1 · Vibe Coding</div>
+    <div>Act III · 10 / 21</div>
+  </div>
+  <div class="frame" style="padding-top:4vh">
+    <div class="kicker" data-anim>AI 原生的开发体验</div>
+    <h2 class="h-xl" data-anim><span class="vibe-float" style="display:inline-block;line-height:1.15;padding-bottom:.1em;background:linear-gradient(135deg,#ff6b35,#e91e63,#9c27b0,#2196f3);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:200% 200%;animation:vibe-gradient 4s ease infinite,vibe-drift 6s ease-in-out infinite">Vibe Coding</span></h2>
+    <p class="lead" style="margin-bottom:4vh" data-anim>让 AI <strong style="color:#2196f3">真正理解硬件</strong>，而不是只会写通用 C 代码。</p>
+    <div class="pipeline" data-cols="3" style="margin-top:4vh">
+      <div class="step accent-top" data-anim>
+        <div class="step-nb" style="color:#ff6b35">核心 1</div>
+        <div class="step-title" style="color:#ff6b35">硬件上下文</div>
+        <div class="step-desc">IDE 将板型、引脚、外设配置、SDK API <strong>全部同步给 AI</strong></div>
+      </div>
+      <div class="step accent-top" data-anim>
+        <div class="step-nb" style="color:#9c27b0">核心 2</div>
+        <div class="step-title" style="color:#9c27b0">AI Skills</div>
+        <div class="step-desc"><strong>100+</strong> 预构建嵌入式技能，AI 知道如何编译、烧录、配网</div>
+      </div>
+      <div class="step accent-top" data-anim>
+        <div class="step-nb" style="color:#2196f3">核心 3</div>
+        <div class="step-title" style="color:#2196f3">自然语言驱动</div>
+        <div class="step-desc">描述需求，AI 直接生成<strong>可编译运行</strong>的代码</div>
+      </div>
+    </div>
+    <!-- Three feature images -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.4vw;margin-top:3vh" data-anim>
+      <figure class="frame-img h-18 fit-contain" style="background:var(--ink)">
+        <img src="images/pin-io-config.svg" alt="Hardware Context">
+      </figure>
+      <figure class="frame-img h-18 fit-contain" style="background:var(--ink)">
+        <img src="images/ai-skills.gif" alt="AI Skills">
+      </figure>
+      <figure class="frame-img h-18 fit-contain" style="background:var(--ink)">
+        <img src="images/cli-input.png" alt="Natural Language Input">
+      </figure>
+    </div>
+  </div>
+  <div class="foot">
+    <div>不是 AI 辅助 — 是 AI 原生</div>
+    <div>— · —</div>
+  </div>
+</section>
+
+<!-- ===== 10 · Breakthrough 2: All-in-One ===== -->
+<section class="slide light">
+  <div class="chrome">
+    <div>突破 2 · All-in-One</div>
+    <div>Act III · 11 / 21</div>
+  </div>
+  <div class="frame" style="padding-top:4vh">
+    <div class="kicker" data-anim>App / Cloud / Hardware 三合一</div>
+    <h2 class="h-xl" data-anim>一个 IDE 搞定<span style="background:linear-gradient(135deg,#2196f3,#00bcd4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">全栈</span></h2>
+    <p class="lead" style="margin-bottom:4vh" data-anim>从"<strong>3 个人 3 个月</strong>"变成"<strong style="color:#ff6b35">1 个人 1 周</strong>"。</p>
+    <div class="pipeline" data-cols="3" style="margin-top:5vh">
+      <div class="step accent-top" data-anim>
+        <div class="step-nb">固件</div>
+        <div class="step-title">Firmware</div>
+        <div class="step-desc">C/C++ 原生支持，自动引脚映射，一键编译烧录</div>
+      </div>
+      <div class="step accent-top" data-anim>
+        <div class="step-nb">云端</div>
+        <div class="step-title">Cloud</div>
+        <div class="step-desc">AI 自动生成云 Agent，数据点同步，一键部署</div>
+      </div>
+      <div class="step accent-top" data-anim>
+        <div class="step-nb">应用</div>
+        <div class="step-title">App</div>
+        <div class="step-desc">拖拽式面板设计，自动生成 MiniApp 代码</div>
+      </div>
+    </div>
+    <!-- Three feature images -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.4vw;margin-top:3vh" data-anim>
+      <figure class="frame-img h-18 fit-contain" style="background:var(--paper)">
+        <img src="images/t5-core.png" alt="Firmware - T5 Board">
+      </figure>
+      <figure class="frame-img h-18 fit-contain" style="background:var(--paper)">
+        <img src="images/cloud-agent.png" alt="Cloud Agent">
+      </figure>
+      <figure class="frame-img h-18 fit-contain" style="background:var(--paper)">
+        <img src="images/app-panel.png" alt="App Panel">
+      </figure>
+    </div>
+  </div>
+  <div class="foot">
+    <div>Firmware + Cloud + App — 不再割裂</div>
+    <div>— · —</div>
+  </div>
+</section>
+
+<!-- ===== 11 · Breakthrough 3: Ecosystem ===== -->
+<section class="slide dark">
+  <div class="chrome">
+    <div>突破 3 · Ecosystem</div>
+    <div>Act III · 12 / 21</div>
+  </div>
+  <div class="frame" style="padding-top:2vh">
+    <div style="display:grid;grid-template-columns:7fr 5fr;gap:2vw;align-items:center">
+      <div>
+        <div class="kicker" data-anim>无缝集成现有生态</div>
+        <h2 class="h-xl" style="font-size:clamp(32px,4.8vw,86px)" data-anim>不是新工具<br/>是你工具的<span style="background:linear-gradient(135deg,#2196f3,#9c27b0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">升级</span></h2>
+        <p class="lead" style="margin-top:1.5vh" data-anim><strong>VS Code / Cursor</strong> 原生扩展，支持所有主流大模型和 <strong style="color:#ff6b35">15+ 款芯片</strong>。</p>
+      </div>
+      <div data-anim style="display:flex;align-items:center;justify-content:center;gap:3vw">
+        <img src="images/vscode-icon.png" style="width:min(8vw,100px);height:auto" alt="VS Code">
+        <img src="images/cursor-icon.png" style="width:min(8vw,100px);height:auto" alt="Cursor">
+      </div>
+    </div>
+    <div class="grid-6" style="margin-top:1.5vh;gap:.6vw">
+      <div class="stat-card" style="padding:1vh .8vw" data-anim>
+        <div class="stat-label">IDE</div>
+        <div class="stat-nb" style="font-size:2.8vw">VS Code/Cursor</div>
+        <div class="stat-note">原生扩展，不用学新工具</div>
+      </div>
+      <div class="stat-card" style="padding:1vh .8vw" data-anim>
+        <div class="stat-label">AI Models</div>
+        <div class="stat-nb" style="font-size:2.2vw">最新最好的<br>Coding Agent 模型</div>
+        <div class="stat-note">Claude Opus / Sonnet / Gemini / GPT</div>
+      </div>
+      <div class="stat-card" style="padding:1vh .8vw" data-anim>
+        <div class="stat-label">Chips</div>
+        <div class="stat-nb">15+</div>
+        <div class="stat-note">T2/T3/T5 + ESP32 + 树莓派</div>
+      </div>
+      <div class="stat-card" style="padding:1vh .8vw" data-anim>
+        <div class="stat-label">Drivers</div>
+        <div class="stat-nb">5K+</div>
+        <div class="stat-note">集成 PlatformIO 驱动库</div>
+      </div>
+      <div class="stat-card" style="padding:1vh .8vw" data-anim>
+        <div class="stat-label">Platform</div>
+        <div class="stat-nb" style="font-size:2.8vw">Windows / macOS / Linux</div>
+        <div class="stat-note">跨平台可用</div>
+      </div>
+      <div class="stat-card accent-top" style="padding:1vh .8vw" data-anim>
+        <div class="stat-label">TuyaOpen SDK</div>
+        <div class="stat-nb" style="font-size:2.8vw">Apache 2.0</div>
+        <div class="stat-note">开源</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot">
+    <div>开放生态 — 不锁定任何平台</div>
+    <div>— · —</div>
+  </div>
+</section>
+
+<!-- ===== 13 · Transition: What You'll Build ===== -->
+<section class="slide hero dark">
+  <div class="chrome">
+    <div>预览 · What You'll Build</div>
+    <div>Act III → IV · 13 / 21</div>
+  </div>
+  <div class="frame" style="display:grid; gap:4vh; align-content:center; min-height:76vh">
+    <div class="kicker" data-anim>接下来 30 分钟</div>
+    <h1 class="h-hero" style="font-size:6.5vw" data-anim>亲手做出你的<br/>第一个智能设备</h1>
+    <p class="lead" style="max-width:60vw" data-anim>从零开始，一句话让 AI 帮你完成一个完整的三路联网开关。</p>
+    <div class="grid-3" style="margin-top:3vh">
+      <div class="stat-card" data-anim>
+        <div class="stat-label">Step 1</div>
+        <div class="stat-nb" style="font-size:3.2vw">安装 & 建项目</div>
+        <div class="stat-note">5 分钟：VS Code 扩展 + 选板 + 创建项目</div>
+      </div>
+      <div class="stat-card" data-anim>
+        <div class="stat-label">Step 2</div>
+        <div class="stat-nb" style="font-size:3.2vw">Vibe Coding</div>
+        <div class="stat-note">10 分钟：一句话生成代码、编译、烧录</div>
+      </div>
+      <div class="stat-card accent-top" data-anim>
+        <div class="stat-label">Step 3</div>
+        <div class="stat-nb" style="font-size:3.2vw">手机控制设备</div>
+        <div class="stat-note">15 分钟：配网上云、App 操控你的开关</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot">
+    <div>30 min · Step by Step · 人人都能完成</div>
+    <div>— · —</div>
+  </div>
+</section>
+
+<!-- ===== 14 · Chapter: Workshop ===== -->
+<section class="slide hero dark">
+  <div class="chrome">
+    <div>第四幕 · Workshop</div>
+    <div>Act IV · 14 / 21</div>
+  </div>
+  <div class="frame" style="display:grid; gap:6vh; align-content:center; min-height:80vh">
+    <div class="kicker" data-anim>Act IV · Hands-on</div>
+    <h1 class="h-hero" style="font-size:7.5vw" data-anim>Workshop</h1>
+    <p class="lead" style="max-width:60vw" data-anim>
+      耳听为虚，眼见为实。30 分钟内，亲手做出你的第一个智能硬件。
+    </p>
+    <p class="lead" style="max-width:60vw;opacity:.7" data-anim>
+      30 min · Step by Step · 人人都能完成
+    </p>
+  </div>
+  <div class="foot">
+    <div>30 min · Step by Step · 人人都能完成</div>
+    <div>— · —</div>
+  </div>
+</section>
+
+<!-- ===== 13 · Workshop Checklist ===== -->
+<section class="slide light">
+  <div class="chrome">
+    <div>Workshop · Prep</div>
+    <div>Act IV · 15 / 21</div>
+  </div>
+  <div class="frame" style="padding-top:4vh">
+    <div class="kicker" data-anim>5 分钟准备工作</div>
+    <h2 class="h-xl" data-anim>准备工作</h2>
+    <p class="lead" style="margin-bottom:5vh" data-anim>确认以下四项，然后开始。</p>
+    <div class="pipeline" data-cols="4" style="margin-top:4vh">
+      <div class="step accent-top" data-anim>
+        <div class="step-nb">01</div>
+        <div class="step-title">VS Code / Cursor</div>
+        <div class="step-desc">已安装最新版本</div>
+        <div style="margin-top:1.5vh;display:flex;align-items:center;justify-content:space-evenly">
+          <img src="images/vscode-icon.png" style="width:min(5vw,56px);height:auto" alt="VS Code">
+          <img src="images/cursor-icon.png" style="width:min(5vw,56px);height:auto" alt="Cursor">
+        </div>
+        <div style="margin-top:1.2vh;font-size:clamp(11px,1.1vw,14px);line-height:1.5;opacity:.75">
+          <strong>VS Code</strong> — 开放生态，可搭配 Claude Code、Codex 等第三方 Coding Agent<br>
+          <strong>Cursor</strong> — 内置 AI，适合只用 Cursor 自家模型的开发者
+        </div>
+      </div>
+      <div class="step" data-anim>
+        <div class="step-nb">02</div>
+        <div class="step-title">TuyaOpen IDE</div>
+        <div class="step-desc">扩展商店搜索安装</div>
+        <img src="images/ide-install.png" alt="IDE Install" style="margin-top:1vh;width:100%;height:auto;cursor:pointer;border-radius:4px" onclick="var o=document.createElement('div');o.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;cursor:pointer';o.onclick=function(){o.remove()};var i=document.createElement('img');i.src=this.src;i.style.cssText='max-width:80vw;max-height:80vh;object-fit:contain;border-radius:6px;box-shadow:0 4px 40px rgba(0,0,0,.5)';o.appendChild(i);document.body.appendChild(o)">
+      </div>
+      <div class="step" data-anim>
+        <div class="step-nb">03</div>
+        <div class="step-title">开发板 + USB</div>
+        <div class="step-desc">Tuya T5 开发板</div>
+        <img src="images/board-icon.png" alt="Board" style="margin-top:1.2vh;width:100%;max-height:14vh;object-fit:contain;cursor:pointer;border-radius:4px;transform:rotate(-90deg)" onclick="var o=document.createElement('div');o.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;cursor:pointer';o.onclick=function(){o.remove()};var i=document.createElement('img');i.src=this.src;i.style.cssText='max-width:80vw;max-height:80vh;object-fit:contain;border-radius:6px;box-shadow:0 4px 40px rgba(0,0,0,.5)';o.appendChild(i);document.body.appendChild(o)">
+        <div style="margin-top:1.2vh;font-size:clamp(11px,1.1vw,14px);line-height:1.5;opacity:.75">
+          使用 USB Type-C 线连接开发板到电脑。<br>
+          <em>注：若连接异常，打开设备管理器确认挂载了两个新串口 — 一路烧录，一路日志调试。</em>
+        </div>
+      </div>
+      <div class="step" data-anim>
+        <div class="step-nb">04</div>
+        <div class="step-title">Tuya 账号</div>
+        <div class="step-desc">创建新账号并登录</div>
+        <img src="images/account login.png" alt="Account Login" style="margin-top:1vh;width:100%;height:auto;cursor:pointer;border-radius:4px" onclick="var o=document.createElement('div');o.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;cursor:pointer';o.onclick=function(){o.remove()};var i=document.createElement('img');i.src=this.src;i.style.cssText='max-width:80vw;max-height:80vh;object-fit:contain;border-radius:6px;box-shadow:0 4px 40px rgba(0,0,0,.5)';o.appendChild(i);document.body.appendChild(o)">
+      </div>
+    </div>
+  </div>
+  <div class="foot">
+    <div>全部确认后，进入下一步</div>
+    <div>— · —</div>
+  </div>
+</section>
+
+<!-- ===== 13.5 · IDE Interface Overview (Interactive) ===== -->
+<section class="slide light" id="ide-overview-slide">
+  <div class="chrome">
+    <div>IDE 界面总览</div>
+    <div>Act IV · Workshop</div>
+  </div>
+  <div class="frame" style="padding-top:3vh">
+    <div class="kicker" data-anim>TuyaOpen IDE 界面导览</div>
+    <h2 class="h-xl" data-anim>功能面板一览</h2>
+    <div style="display:grid;grid-template-columns:180px 1fr;gap:1.5vw;margin-top:2.5vh;height:64vh">
+      <!-- Left: Button list -->
+      <div id="ide-nav" style="display:flex;flex-direction:column;gap:.6vh;overflow-y:auto">
+        <button class="ide-nav-btn active" data-idx="0" style="text-align:left;padding:.9vh 1vw;border:1px solid var(--ink);background:var(--ink);color:var(--paper);font-size:clamp(11px,1vw,14px);font-weight:600;cursor:pointer;transition:all .2s">1. 项目管理</button>
+        <button class="ide-nav-btn" data-idx="1" style="text-align:left;padding:.9vh 1vw;border:1px solid var(--ink);background:transparent;color:var(--ink);font-size:clamp(11px,1vw,14px);font-weight:600;cursor:pointer;transition:all .2s">2. 开发板</button>
+        <button class="ide-nav-btn" data-idx="2" style="text-align:left;padding:.9vh 1vw;border:1px solid var(--ink);background:transparent;color:var(--ink);font-size:clamp(11px,1vw,14px);font-weight:600;cursor:pointer;transition:all .2s">3. 驱动库</button>
+        <button class="ide-nav-btn" data-idx="3" style="text-align:left;padding:.9vh 1vw;border:1px solid var(--ink);background:transparent;color:var(--ink);font-size:clamp(11px,1vw,14px);font-weight:600;cursor:pointer;transition:all .2s">4. 示例项目</button>
+        <button class="ide-nav-btn" data-idx="4" style="text-align:left;padding:.9vh 1vw;border:1px solid var(--ink);background:transparent;color:var(--ink);font-size:clamp(11px,1vw,14px);font-weight:600;cursor:pointer;transition:all .2s">5. AI Skills</button>
+        <button class="ide-nav-btn" data-idx="5" style="text-align:left;padding:.9vh 1vw;border:1px solid var(--ink);background:transparent;color:var(--ink);font-size:clamp(11px,1vw,14px);font-weight:600;cursor:pointer;transition:all .2s">6. 项目详情</button>
+        <button class="ide-nav-btn" data-idx="6" style="text-align:left;padding:.9vh 1vw;border:1px solid var(--ink);background:transparent;color:var(--ink);font-size:clamp(11px,1vw,14px);font-weight:600;cursor:pointer;transition:all .2s">7. 密钥管理</button>
+        <button class="ide-nav-btn" data-idx="7" style="text-align:left;padding:.9vh 1vw;border:1px solid var(--ink);background:transparent;color:var(--ink);font-size:clamp(11px,1vw,14px);font-weight:600;cursor:pointer;transition:all .2s">8. 设置</button>
+        <button class="ide-nav-btn" data-idx="8" style="text-align:left;padding:.9vh 1vw;border:1px solid var(--ink);background:transparent;color:var(--ink);font-size:clamp(11px,1vw,14px);font-weight:600;cursor:pointer;transition:all .2s">9. 工作区</button>
+      </div>
+      <!-- Right: Image display -->
+      <div id="ide-display" style="position:relative;background:var(--paper-tint);border:1px solid rgba(10,10,11,.1);overflow:hidden">
+        <!-- Panel 1: Project Management -->
+        <div class="ide-panel active" data-panel="0" style="position:absolute;inset:0;display:flex;flex-direction:column;padding:1.5vw;transition:opacity .3s;pointer-events:auto">
+          <img src="images/panel-guide-walkthrough/1.Project Management Create Project through Board Or Demos.png" style="max-width:100%;max-height:46vh;object-fit:contain;cursor:pointer;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.15);background:#fff;padding:10px" onclick="var o=document.createElement('div');o.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;cursor:pointer';o.onclick=function(){o.remove()};var i=document.createElement('img');i.src=this.src;i.style.cssText='max-width:80vw;max-height:80vh;object-fit:contain;border-radius:6px;box-shadow:0 4px 40px rgba(0,0,0,.5)';o.appendChild(i);document.body.appendChild(o)">
+          <p style="margin-top:1.5vh;font-size:clamp(14px,1.3vw,18px);line-height:1.6"><strong>项目管理</strong> — 通过选择开发板或示例 Demo 快速创建新项目，一键初始化 SDK 和工具链环境。</p>
+        </div>
+        <!-- Panel 2: Boards -->
+        <div class="ide-panel" data-panel="1" style="position:absolute;inset:0;display:flex;flex-direction:column;padding:1.5vw;opacity:0;pointer-events:none;transition:opacity .3s">
+          <img src="images/panel-guide-walkthrough/2.boards-all-boards-available-details-resources-andguides-for-boards.png" style="max-width:100%;max-height:46vh;object-fit:contain;cursor:pointer;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.15);background:#fff;padding:10px" onclick="var o=document.createElement('div');o.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;cursor:pointer';o.onclick=function(){o.remove()};var i=document.createElement('img');i.src=this.src;i.style.cssText='max-width:80vw;max-height:80vh;object-fit:contain;border-radius:6px;box-shadow:0 4px 40px rgba(0,0,0,.5)';o.appendChild(i);document.body.appendChild(o)">
+          <p style="margin-top:1.5vh;font-size:clamp(14px,1.3vw,18px);line-height:1.6"><strong>开发板中心</strong> — 浏览所有支持的开发板，查看详细规格、资源文档和开发指南。</p>
+        </div>
+        <!-- Panel 3: Libraries -->
+        <div class="ide-panel" data-panel="2" style="position:absolute;inset:0;display:flex;flex-direction:column;padding:1.5vw;opacity:0;pointer-events:none;transition:opacity .3s">
+          <img src="images/panel-guide-walkthrough/3.libraries-management-and-platform-io-import-libs.png" style="max-width:100%;max-height:46vh;object-fit:contain;cursor:pointer;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.15);background:#fff;padding:10px" onclick="var o=document.createElement('div');o.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;cursor:pointer';o.onclick=function(){o.remove()};var i=document.createElement('img');i.src=this.src;i.style.cssText='max-width:80vw;max-height:80vh;object-fit:contain;border-radius:6px;box-shadow:0 4px 40px rgba(0,0,0,.5)';o.appendChild(i);document.body.appendChild(o)">
+          <p style="margin-top:1.5vh;font-size:clamp(14px,1.3vw,18px);line-height:1.6"><strong>驱动库管理</strong> — 集成 PlatformIO 生态，5000+ 驱动和组件库一键搜索、安装和版本管理。</p>
+        </div>
+        <!-- Panel 4: Demos -->
+        <div class="ide-panel" data-panel="3" style="position:absolute;inset:0;display:flex;flex-direction:column;padding:1.5vw;opacity:0;pointer-events:none;transition:opacity .3s">
+          <img src="images/panel-guide-walkthrough/4.demos-and-quick-start-projects.png" style="max-width:100%;max-height:46vh;object-fit:contain;cursor:pointer;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.15);background:#fff;padding:10px" onclick="var o=document.createElement('div');o.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;cursor:pointer';o.onclick=function(){o.remove()};var i=document.createElement('img');i.src=this.src;i.style.cssText='max-width:80vw;max-height:80vh;object-fit:contain;border-radius:6px;box-shadow:0 4px 40px rgba(0,0,0,.5)';o.appendChild(i);document.body.appendChild(o)">
+          <p style="margin-top:1.5vh;font-size:clamp(14px,1.3vw,18px);line-height:1.6"><strong>示例 & 快速开始</strong> — 预置丰富的 Demo 项目模板，选择即用，快速验证硬件功能和业务逻辑。</p>
+        </div>
+        <!-- Panel 5: AI Skills -->
+        <div class="ide-panel" data-panel="4" style="position:absolute;inset:0;display:flex;flex-direction:column;padding:1.5vw;opacity:0;pointer-events:none;transition:opacity .3s">
+          <img src="images/panel-guide-walkthrough/5.vibe-coding-skills-installs-by-projects.png" style="max-width:100%;max-height:46vh;object-fit:contain;cursor:pointer;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.15);background:#fff;padding:10px" onclick="var o=document.createElement('div');o.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;cursor:pointer';o.onclick=function(){o.remove()};var i=document.createElement('img');i.src=this.src;i.style.cssText='max-width:80vw;max-height:80vh;object-fit:contain;border-radius:6px;box-shadow:0 4px 40px rgba(0,0,0,.5)';o.appendChild(i);document.body.appendChild(o)">
+          <p style="margin-top:1.5vh;font-size:clamp(14px,1.3vw,18px);line-height:1.6"><strong>Vibe Coding Skills</strong> — 按项目自动安装 AI 技能包，让 AI 理解你的开发板、SDK 和硬件上下文。</p>
+        </div>
+        <!-- Panel 6: Project Details -->
+        <div class="ide-panel" data-panel="5" style="position:absolute;inset:0;display:flex;flex-direction:column;padding:1.5vw;opacity:0;pointer-events:none;transition:opacity .3s">
+          <img src="images/panel-guide-walkthrough/1.jpg" style="max-width:100%;max-height:46vh;object-fit:contain;cursor:pointer;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.15);background:#fff;padding:10px" onclick="var o=document.createElement('div');o.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;cursor:pointer';o.onclick=function(){o.remove()};var i=document.createElement('img');i.src=this.src;i.style.cssText='max-width:80vw;max-height:80vh;object-fit:contain;border-radius:6px;box-shadow:0 4px 40px rgba(0,0,0,.5)';o.appendChild(i);document.body.appendChild(o)">
+          <p style="margin-top:1.5vh;font-size:clamp(14px,1.3vw,18px);line-height:1.6"><strong>项目详情</strong> — 展示固件信息、内存占用、Flash 分区，以及云端 DP 点定义和硬件 IO 使用状况。Coding AI 对这些上下文有感知，可直接读取并操作。</p>
+        </div>
+        <!-- Panel 7: Keys -->
+        <div class="ide-panel" data-panel="6" style="position:absolute;inset:0;display:flex;flex-direction:column;padding:1.5vw;opacity:0;pointer-events:none;transition:opacity .3s">
+          <img src="images/panel-guide-walkthrough/6.Keys-Managemtnt-For-Tuya-Cloud-Connected-Applications-This-The-Key-Storage-AI-Can-Grab-These-And-Auto-Auth-The-Device.png" style="max-width:100%;max-height:46vh;object-fit:contain;cursor:pointer;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.15);background:#fff;padding:10px" onclick="var o=document.createElement('div');o.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;cursor:pointer';o.onclick=function(){o.remove()};var i=document.createElement('img');i.src=this.src;i.style.cssText='max-width:80vw;max-height:80vh;object-fit:contain;border-radius:6px;box-shadow:0 4px 40px rgba(0,0,0,.5)';o.appendChild(i);document.body.appendChild(o)">
+          <p style="margin-top:1.5vh;font-size:clamp(14px,1.3vw,18px);line-height:1.6"><strong>密钥管理</strong> — 统一管理涂鸦云连接密钥，AI 可自动读取并完成设备鉴权，免手动配置。</p>
+        </div>
+        <!-- Panel 8: Settings -->
+        <div class="ide-panel" data-panel="7" style="position:absolute;inset:0;display:flex;flex-direction:column;padding:1.5vw;opacity:0;pointer-events:none;transition:opacity .3s">
+          <img src="images/panel-guide-walkthrough/7.Settings-Language-Change.png" style="max-width:100%;max-height:46vh;object-fit:contain;cursor:pointer;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.15);background:#fff;padding:10px" onclick="var o=document.createElement('div');o.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;cursor:pointer';o.onclick=function(){o.remove()};var i=document.createElement('img');i.src=this.src;i.style.cssText='max-width:80vw;max-height:80vh;object-fit:contain;border-radius:6px;box-shadow:0 4px 40px rgba(0,0,0,.5)';o.appendChild(i);document.body.appendChild(o)">
+          <p style="margin-top:1.5vh;font-size:clamp(14px,1.3vw,18px);line-height:1.6"><strong>设置</strong> — 中文用户可切换中文语言界面。</p>
+        </div>
+        <!-- Panel 9: Workspace -->
+        <div class="ide-panel" data-panel="8" style="position:absolute;inset:0;display:flex;flex-direction:column;padding:1.5vw;opacity:0;pointer-events:none;transition:opacity .3s">
+          <img src="images/panel-guide-walkthrough/8.Left Is the Project Dir of Your Current Project Code- and right is the AI Chat Panel.png" style="max-width:100%;max-height:46vh;object-fit:contain;cursor:pointer;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.15);background:#fff;padding:10px" onclick="var o=document.createElement('div');o.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;cursor:pointer';o.onclick=function(){o.remove()};var i=document.createElement('img');i.src=this.src;i.style.cssText='max-width:80vw;max-height:80vh;object-fit:contain;border-radius:6px;box-shadow:0 4px 40px rgba(0,0,0,.5)';o.appendChild(i);document.body.appendChild(o)">
+          <p style="margin-top:1.5vh;font-size:clamp(14px,1.3vw,18px);line-height:1.6"><strong>工作区全貌</strong> — 左侧项目目录树浏览代码文件，右侧 AI 聊天面板实时对话驱动开发。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="foot">
+    <div></div>
+    <div>— · —</div>
+  </div>
+</section>
+
+<!-- ===== 14 · Step 1: Create Project ===== -->
+<section class="slide dark">
+  <div class="chrome">
+    <div>Step 1 · Create</div>
+    <div>Act IV · 16 / 21</div>
+  </div>
+  <div class="frame" style="padding-top:2vh">
+    <div class="kicker" data-anim>3 分钟</div>
+    <h2 class="h-xl" style="font-size:clamp(28px,4.2vw,72px)" data-anim>创建项目</h2>
+    <p class="lead" style="margin-bottom:2vh" data-anim>SDK 自动安装，环境零配置。</p>
+    <div style="margin-bottom:1.5vh;padding:1vh 1.2vw;background:rgba(10,10,11,.05);border-left:3px solid var(--ink);font-size:clamp(11px,1vw,14px);line-height:1.4" data-anim>
+      <strong>提示：</strong>首次启动时基础 SDK 会自动下载安装，耗时较长。若开发板列表或项目清单未加载出来，请稍等片刻。
+    </div>
+    <div class="pipeline" data-cols="4" style="margin-top:2vh">
+      <div class="step" data-anim>
+        <div class="step-nb">01</div>
+        <div class="step-title">打开面板</div>
+        <div class="step-desc">找不到面板在哪？</div>
+        <div style="margin-top:.8vh;display:flex;flex-direction:column;gap:.6vh;align-items:start">
+          <img src="images/open-panel.png" style="max-width:100%;max-height:16vh;object-fit:contain;cursor:pointer;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,.15);background:#fff;padding:6px;width:100%" onclick="var o=document.createElement('div');o.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;cursor:pointer';o.onclick=function(){o.remove()};var i=document.createElement('img');i.src=this.src;i.style.cssText='max-width:80vw;max-height:80vh;object-fit:contain;border-radius:6px;box-shadow:0 4px 40px rgba(0,0,0,.5)';o.appendChild(i);document.body.appendChild(o)">
+          <img src="images/open-panel-bottom.png" style="max-width:100%;max-height:16vh;object-fit:contain;cursor:pointer;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,.15);background:#fff;padding:6px;width:100%" onclick="var o=document.createElement('div');o.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;cursor:pointer';o.onclick=function(){o.remove()};var i=document.createElement('img');i.src=this.src;i.style.cssText='max-width:80vw;max-height:80vh;object-fit:contain;border-radius:6px;box-shadow:0 4px 40px rgba(0,0,0,.5)';o.appendChild(i);document.body.appendChild(o)">
+        </div>
+        <div style="margin-top:.6vh;font-size:clamp(10px,.9vw,12px);line-height:1.4;opacity:.75">
+          ① <code>Ctrl+Shift+P</code> → 输入 <code>TuyaOpen</code><br>
+          ② 点击左侧栏 TuyaOpen IDE 图标<br>
+          <span style="font-weight:600;opacity:1">— or —</span> 底部状态栏点击 TuyaOpen 按钮
+        </div>
+      </div>
+      <div class="step" data-anim>
+        <div class="step-nb">02</div>
+        <div class="step-title">New Project</div>
+        <div class="step-desc">点击新建项目</div>
+        <img src="images/new-proj-board.png" style="margin-top:1vh;width:100%;height:18vh;object-fit:contain;cursor:pointer;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.15);background:#fff;padding:8px" onclick="var o=document.createElement('div');o.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;cursor:pointer';o.onclick=function(){o.remove()};var i=document.createElement('img');i.src=this.src;i.style.cssText='max-width:80vw;max-height:80vh;object-fit:contain;border-radius:6px;box-shadow:0 4px 40px rgba(0,0,0,.5)';o.appendChild(i);document.body.appendChild(o)">
+      </div>
+      <div class="step" data-anim>
+        <div class="step-nb">03</div>
+        <div class="step-title">选择 T5-E1</div>
+        <div class="step-desc">选择你的开发板型号</div>
+        <img src="images/new-proj-board-select-t5.png" style="margin-top:1vh;width:100%;height:18vh;object-fit:contain;cursor:pointer;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.15);background:#fff;padding:8px" onclick="var o=document.createElement('div');o.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;cursor:pointer';o.onclick=function(){o.remove()};var i=document.createElement('img');i.src=this.src;i.style.cssText='max-width:80vw;max-height:80vh;object-fit:contain;border-radius:6px;box-shadow:0 4px 40px rgba(0,0,0,.5)';o.appendChild(i);document.body.appendChild(o)">
+      </div>
+      <div class="step accent-top" data-anim>
+        <div class="step-nb">04</div>
+        <div class="step-title">创建项目</div>
+        <div class="step-desc">给予项目名称，如 hello_world、my_first_project 或 ai_smart_light</div>
+        <img src="images/new-proj-comfirm.png" style="margin-top:1vh;width:100%;height:18vh;object-fit:contain;cursor:pointer;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.15);background:#fff;padding:8px" onclick="var o=document.createElement('div');o.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;cursor:pointer';o.onclick=function(){o.remove()};var i=document.createElement('img');i.src=this.src;i.style.cssText='max-width:80vw;max-height:80vh;object-fit:contain;border-radius:6px;box-shadow:0 4px 40px rgba(0,0,0,.5)';o.appendChild(i);document.body.appendChild(o)">
+        <div style="margin-top:1vh;font-size:clamp(11px,1vw,13px);line-height:1.5;opacity:.75">
+          创建完成后页面将自动重启，进入项目目录。
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="foot">
+    <div></div>
+    <div>— · —</div>
+  </div>
+</section>
+
+<!-- ===== 15 · Step 2: Vibe Coding ===== -->
+<section class="slide light">
+  <div class="chrome">
+    <div>Step 2 · Vibe Coding</div>
+    <div>Act IV · 17 / 21</div>
+  </div>
+  <div class="frame" style="padding-top:2vh">
+    <div class="kicker" data-anim>核心环节 · 10 分钟</div>
+    <h2 class="h-xl" style="font-size:clamp(28px,4.2vw,72px)" data-anim>一行命令，一个产品</h2>
+    <p class="lead" style="margin-bottom:2vh" data-anim>打开 AI Coding Agent 对话面板</p>
+    <div class="pipeline-section">
+      <div class="pipeline-label" data-anim>自然语言 → 可运行代码</div>
+      <div class="callout" style="margin-top:2vh;font-size:clamp(14px,1.4vw,20px)" data-anim>
+      在 AI 输入框里输入：<br><span style="background:linear-gradient(135deg,#ff6b35 0%,#e91e63 25%,#9c27b0 50%,#2196f3 75%,#00bcd4 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-weight:700">"帮我创建一个三路开关的联网开关，烧录调试我的设备，确保我的项目可用。"</span>
+      <br><br><span style="font-size:clamp(12px,1.1vw,16px);opacity:.8">AI 将自动完成：代码生成 → 编译 → 烧录 → 调试验证 &nbsp;|&nbsp; <strong>One Prompt → Ship</strong></span>
+      </div>
+    </div>
+    <p style="margin-top:2vh;font-size:clamp(12px,1.1vw,15px);font-weight:600" data-anim>AI 工作时，了解一下背后发生了什么：</p>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1.5vw;margin-top:1vh;font-size:clamp(11px,.95vw,14px);line-height:1.6" data-anim>
+      <div><strong>☁️ 云端产品</strong><br>自动在涂鸦云创建产品，定义 DP（Data Point）— 设备与云端交互的功能点</div>
+      <div><strong>⚙️ 固件实现</strong><br>在嵌入式端完成每个 DP 点的功能代码，实现设备与云端的双向通信</div>
+      <div><strong>🔄 闭环调试</strong><br>自动编译、烧录，并从串口 Log 读取反馈，形成 Hardware-in-the-Loop 闭环校验</div>
+      <div><strong>✅ 智能收敛</strong><br>问题实时反馈回 Coding Agent，AI 自动修复并给出调试建议，直到项目可用</div>
+    </div>
+  </div>
+  <div class="foot">
+    <div>这是 Vibe Coding 的魔力 — 说人话，出代码</div>
+    <div>— · —</div>
+  </div>
+</section>
+
+<!-- ===== 16 · More Prompts ===== -->
+<section class="slide light">
+  <div class="chrome">
+    <div>更多玩法 · Prompts</div>
+    <div>Act IV · 18 / 21</div>
+  </div>
+  <div class="frame" style="padding-top:2vh">
+    <div class="kicker" data-anim>不止一行命令</div>
+    <h2 class="h-xl" style="font-size:clamp(28px,4.2vw,72px)" data-anim>你还可以这样问 AI</h2>
+    <p class="lead" style="margin-bottom:2vh" data-anim>覆盖嵌入式开发全流程 — 硬件、固件、云端、UI、调试</p>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1.2vw 1.6vw;margin-top:1vh">
+      <div class="step" style="padding:1vh 1vw" data-anim>
+        <div class="step-title" style="font-size:clamp(12px,1.1vw,16px)">🔌 硬件接口</div>
+        <div class="step-desc" style="opacity:.85;line-height:1.5;font-size:clamp(11px,.95vw,14px)">"GPIO 占用情况？哪些引脚可用？"<br>"SPI 重映射到 IO18/IO19"</div>
+      </div>
+      <div class="step" style="padding:1vh 1vw" data-anim>
+        <div class="step-title" style="font-size:clamp(12px,1.1vw,16px)">🎨 UI 设计</div>
+        <div class="step-desc" style="opacity:.85;line-height:1.5;font-size:clamp(11px,.95vw,14px)">"用 LVGL 实现设备控制面板"<br>"加一个实时温度曲线图"</div>
+      </div>
+      <div class="step" style="padding:1vh 1vw" data-anim>
+        <div class="step-title" style="font-size:clamp(12px,1.1vw,16px)">💾 存储优化</div>
+        <div class="step-desc" style="opacity:.85;line-height:1.5;font-size:clamp(11px,.95vw,14px)">"Flash 还剩多少？哪些模块最大？"<br>"帮我优化固件体积"</div>
+      </div>
+      <div class="step" style="padding:1vh 1vw" data-anim>
+        <div class="step-title" style="font-size:clamp(12px,1.1vw,16px)">☁️ 云端功能</div>
+        <div class="step-desc" style="opacity:.85;line-height:1.5;font-size:clamp(11px,.95vw,14px)">"新建 DP 节点，上报三轴传感器"<br>"离线缓存数据，上线后批量上报"</div>
+      </div>
+      <div class="step" style="padding:1vh 1vw" data-anim>
+        <div class="step-title" style="font-size:clamp(12px,1.1vw,16px)">📄 原理图 & 文档</div>
+        <div class="step-desc" style="opacity:.85;line-height:1.5;font-size:clamp(11px,.95vw,14px)">"看原理图，帮我对接这个模组"<br>"datasheet 里 PWM 怎么配？"</div>
+      </div>
+      <div class="step" style="padding:1vh 1vw" data-anim>
+        <div class="step-title" style="font-size:clamp(12px,1.1vw,16px)">🔧 驱动开发</div>
+        <div class="step-desc" style="opacity:.85;line-height:1.5;font-size:clamp(11px,.95vw,14px)">"实现 DHT11 温湿度传感器驱动"<br>"WS2812 灯带驱动，支持呼吸效果"</div>
+      </div>
+      <div class="step" style="padding:1vh 1vw" data-anim>
+        <div class="step-title" style="font-size:clamp(12px,1.1vw,16px)">🔑 授权 & 量产</div>
+        <div class="step-desc" style="opacity:.85;line-height:1.5;font-size:clamp(11px,.95vw,14px)">"帮我写入设备授权码"<br>"批量授权和产线烧录脚本"</div>
+      </div>
+      <div class="step" style="padding:1vh 1vw" data-anim>
+        <div class="step-title" style="font-size:clamp(12px,1.1vw,16px)">🐛 日志调试</div>
+        <div class="step-desc" style="opacity:.85;line-height:1.5;font-size:clamp(11px,.95vw,14px)">"分析 Log，定位崩溃原因"<br>"WiFi 偶发断连，帮我排查"</div>
+      </div>
+      <div class="step" style="padding:1vh 1vw" data-anim>
+        <div class="step-title" style="font-size:clamp(12px,1.1vw,16px)">🏗️ 硬件设计建议</div>
+        <div class="step-desc" style="opacity:.85;line-height:1.5;font-size:clamp(11px,.95vw,14px)">"这个电路方案有没有改进空间？"<br>"天线布局怎么优化信号？"</div>
+      </div>
+      <div class="step" style="padding:1vh 1vw" data-anim>
+        <div class="step-title" style="font-size:clamp(12px,1.1vw,16px)">🧩 芯片选型</div>
+        <div class="step-desc" style="opacity:.85;line-height:1.5;font-size:clamp(11px,.95vw,14px)">"做低功耗门锁选哪颗芯片合适？"<br>"T2 和 T3 性能差异对比？"</div>
+      </div>
+      <div class="step" style="padding:1vh 1vw;opacity:.55" data-anim>
+        <div class="step-title" style="font-size:clamp(12px,1.1vw,16px)">📱 App 面板 <span style="font-size:.65em;padding:2px 8px;background:#ff6b35;color:#fff;border-radius:3px;vertical-align:middle">即将上线</span></div>
+        <div class="step-desc" style="opacity:.85;line-height:1.5;font-size:clamp(11px,.95vw,14px)">"定制三路开关控制面板"<br>"面板加能耗统计图表"</div>
+      </div>
+      <div class="step" style="padding:1vh 1vw;opacity:.55" data-anim>
+        <div class="step-title" style="font-size:clamp(12px,1.1vw,16px)">🤖 云端 AI Agent <span style="font-size:.65em;padding:2px 8px;background:#ff6b35;color:#fff;border-radius:3px;vertical-align:middle">即将上线</span></div>
+        <div class="step-desc" style="opacity:.85;line-height:1.5;font-size:clamp(11px,.95vw,14px)">"创建 Agent 工作流"<br>"创建硬件设备控制 MCP 能力"</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot">
+    <div>把想法告诉 AI — 它理解你的硬件上下文</div>
+    <div>— · —</div>
+  </div>
+</section>
+
+<!-- ===== 17 · Workshop Result ===== -->
+<section class="slide hero light">
+  <div class="chrome">
+    <div>Workshop · Summary</div>
+    <div>Act IV · 19 / 21</div>
+  </div>
+  <div class="frame" style="padding-top:6vh">
+    <div class="kicker" data-anim>Workshop 成果</div>
+    <h2 class="h-xl" data-anim>30 分钟，从零到产品</h2>
+    <p class="lead" style="margin-bottom:4vh" data-anim>你刚刚用一句话完成了一个完整的智能硬件。但这只是开始。</p>
+    <div class="grid-3" style="margin-top:2vh">
+      <div class="stat-card" data-anim>
+        <div class="stat-label">Time</div>
+        <div class="stat-nb" style="font-size:5vw">30 <span class="stat-unit">min</span></div>
+        <div class="stat-note">从零到成品设备</div>
+      </div>
+      <div class="stat-card" data-anim>
+        <div class="stat-label">AI-Powered</div>
+        <div class="stat-nb" style="font-size:5vw">全栈</div>
+        <div class="stat-note">固件 + 云 + App 一个人搞定</div>
+      </div>
+      <div class="stat-card accent-top" data-anim>
+        <div class="stat-label">Open Source</div>
+        <div class="stat-nb" style="font-size:4.2vw">Apache 2.0</div>
+        <div class="stat-note">完全开源，属于社区</div>
+      </div>
+    </div>
+    <div style="margin-top:4vh;padding:2.5vh 2.5vw;background:rgba(10,10,11,.03);border-radius:8px" data-anim>
+      <p style="font-size:clamp(15px,1.4vw,20px);line-height:1.8;font-weight:500">
+        <strong>想象力远不止于此。</strong><br>
+        智能门锁、环境监测站、宠物喂食器、农业灌溉系统、工业传感网关……<br>
+        <span style="opacity:.75">你脑中的每一个硬件创意，TuyaOpen IDE 都能帮你从想法走到产品。</span><br>
+        <strong style="background:linear-gradient(135deg,#ff6b35,#e91e63,#9c27b0,#2196f3);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">去创造属于你的 AI 硬件。</strong>
+      </p>
+    </div>
+  </div>
+  <div class="foot">
+    <div>Vibe Coding · 让每个人都能成为硬件创造者</div>
+    <div>— · —</div>
+  </div>
+</section>
+
+<!-- ===== 18 · Vision ===== -->
+<section class="slide hero dark">
+  <div class="chrome">
+    <div>愿景 · Vision</div>
+    <div>20 / 21</div>
+  </div>
+  <div class="frame" style="display:grid; gap:4vh; align-content:center; min-height:80vh">
+    <div class="kicker" data-anim>Our Vision</div>
+    <h1 class="h-hero" style="font-size:6.5vw" data-anim>每个人都能成为<br/>硬件开发者</h1>
+    <p class="lead" style="max-width:60vw" data-anim>
+      你只需要描述你的想法，剩下的交给 TuyaOpen IDE。
+    </p>
+  </div>
+  <div class="foot">
+    <div>Describe it. Build anything.</div>
+    <div>— · —</div>
+  </div>
+</section>
+
+<!-- ===== 19 · Closing & Resources ===== -->
+<section class="slide light">
+  <div class="chrome">
+    <div>TuyaOpen IDE · Available Now</div>
+    <div>21 / 21</div>
+  </div>
+  <div class="frame" style="padding-top:6vh">
+    <div class="kicker" data-anim>正式发布 · Available Today</div>
+    <h2 class="h-xl" data-anim>Get Started</h2>
+    <p class="lead" style="margin-bottom:5vh" data-anim>TuyaOpen IDE 正式版今日发布。免费、跨平台。</p>
+    <div class="grid-3" style="margin-top:4vh">
+      <div class="stat-card accent-top" data-anim>
+        <div class="stat-label">Download</div>
+        <div class="stat-nb" style="font-size:2.6vw">VS Code / Cursor</div>
+        <div class="stat-note">Marketplace 搜索 <strong style="background:linear-gradient(135deg,#ff6b35,#e91e63,#9c27b0,#2196f3);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">TuyaOpen IDE</strong></div>
+      </div>
+      <div class="stat-card" data-anim>
+        <div class="stat-label">Docs</div>
+        <div class="stat-nb" style="font-size:3vw">tuyaopen.ai</div>
+        <div class="stat-note">官方文档与示例</div>
+      </div>
+      <div class="stat-card" data-anim>
+        <div class="stat-label">Community</div>
+        <div class="stat-nb" style="font-size:3vw">GitHub</div>
+        <div class="stat-note">github.com/tuya/tuyaopen</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:3vw;margin-top:2vh" data-anim>
+      <img src="images/contact_me_qr(1).png" style="width:min(14vw,160px);height:auto;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.1)">
+      <div>
+        <p style="font-size:clamp(16px,1.5vw,22px);font-weight:600">上万开发者等你来加入</p>
+        <p style="font-size:clamp(13px,1.1vw,16px);opacity:.7;margin-top:.8vh">扫码加入开发者社区，获取最新资讯与技术支持</p>
+      </div>
+    </div>
+  </div>
+  <div class="foot">
+    <div>Vibe Coding · Hardware-in-the-Loop · Ship Faster</div>
+    <div>— Thank You —</div>
+  </div>
+</section>
+
+</div>
+
+<div id="nav"></div>
+
+<script>
+/* =============== WebGL 双背景 ===============
+   深色页：Holographic Dispersion（全息色散 · 钛金暗流）—— 彩虹微扰、鼠标径向涟漪
+   浅色页：Spiral Vortex（旋转涡流 · 银色珍珠）—— domain-warp 流动、无中心
+   修改风格请参考 references/webgl-backgrounds.md
+*/
+const VS = `attribute vec2 position;void main(){gl_Position=vec4(position,0.0,1.0);}`;
+
+const FS_DARK = `precision highp float;
+uniform vec2 u_resolution;uniform float u_time;uniform vec2 u_mouse;
+vec3 palette(float t,vec3 a,vec3 b,vec3 c,vec3 d){return a+b*cos(6.28318*(c*t+d));}
+void main(){
+  vec2 uv=gl_FragCoord.xy/u_resolution.xy;
+  vec2 p=uv*2.0-1.0;p.x*=u_resolution.x/u_resolution.y;
+  vec2 m=u_mouse*2.0-1.0;m.x*=u_resolution.x/u_resolution.y;
+  float md=length(p-m);
+  float mr=sin(md*15.0-u_time*4.0)*exp(-md*3.0);p+=mr*0.08;
+  vec2 p0=p;
+  for(float i=1.0;i<4.0;i++){
+    p.x+=0.1/i*sin(i*3.0*p.y+u_time*0.4)+0.05;
+    p.y+=0.1/i*cos(i*2.0*p.x+u_time*0.3)-0.05;
+  }
+  float r=length(p);float ang=atan(p.y,p.x);
+  vec3 a=vec3(0.12,0.12,0.13);
+  vec3 b=vec3(0.03,0.04,0.05);
+  vec3 c=vec3(1.0,1.0,1.0);
+  vec3 d=vec3(0.1,0.2,0.4);
+  vec3 col=palette(r*1.5+p0.x*0.5+u_time*0.1,a,b,c,d);
+  float disp=sin(r*25.0-u_time*1.5+ang*2.0)*0.5+0.5;
+  col+=vec3(disp*0.015,disp*0.01,disp*0.02);
+  float hi=pow(sin(p.x*4.0+p.y*3.0+u_time)*0.5+0.5,8.0);
+  col+=hi*0.08;
+  vec3 base=vec3(0.05,0.05,0.06);
+  col=mix(base,col,0.85);
+  gl_FragColor=vec4(col,1.0);
+}`;
+
+const FS_LIGHT = `precision highp float;
+uniform vec2 u_resolution;uniform float u_time;uniform vec2 u_mouse;
+float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float noise(vec2 p){
+  vec2 i=floor(p),f=fract(p);
+  float a=hash(i),b=hash(i+vec2(1,0));
+  float c=hash(i+vec2(0,1)),d=hash(i+vec2(1,1));
+  vec2 u=f*f*(3.0-2.0*f);
+  return mix(a,b,u.x)+(c-a)*u.y*(1.0-u.x)+(d-b)*u.x*u.y;
+}
+float fbm(vec2 p){
+  float v=0.0,a=0.5;
+  mat2 m=mat2(0.80,0.60,-0.60,0.80);
+  for(int i=0;i<5;i++){v+=a*noise(p);p=m*p*2.02;a*=0.5;}
+  return v;
+}
+void main(){
+  vec2 uv=gl_FragCoord.xy/u_resolution.xy;
+  vec2 p=uv;p.x*=u_resolution.x/u_resolution.y;
+  vec2 m=u_mouse;m.x*=u_resolution.x/u_resolution.y;
+  vec2 md=p-m;float dl=length(md);
+  p+=normalize(md+vec2(0.0001))*exp(-dl*5.0)*0.03;
+  vec2 q=vec2(fbm(p*1.8+u_time*0.07),fbm(p*1.8+vec2(5.2,1.3)+u_time*0.06));
+  vec2 r=vec2(fbm(p*2.0+q*1.3+vec2(1.7,9.2)+u_time*0.05),
+              fbm(p*2.0+q*1.3+vec2(8.3,2.8)+u_time*0.04));
+  float f=fbm(p*2.2+r*1.5);
+  vec3 silverDark=vec3(0.86,0.85,0.84);
+  vec3 paper=vec3(0.955,0.945,0.925);
+  vec3 col=mix(silverDark,paper,f);
+  float ph=r.x*2.2+u_time*0.35;
+  col+=vec3(0.78,0.62,0.92)*sin(ph)*0.055;
+  col+=vec3(0.55,0.72,0.95)*sin(ph*0.8+2.0)*0.05;
+  float hl=smoothstep(0.48,0.92,f);
+  col+=hl*0.06;
+  gl_FragColor=vec4(col,1.0);
+}`;
+
+const mouse={x:0.5,y:0.5};
+addEventListener('mousemove',e=>{mouse.x=e.clientX/innerWidth;mouse.y=e.clientY/innerHeight});
+
+function bootGL(canvasId, fsSrc){
+  const canvas=document.getElementById(canvasId);
+  const gl=canvas.getContext('webgl',{alpha:false,antialias:true});
+  if(!gl) return ()=>false;
+  const mk=(t,s)=>{const sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);return sh};
+  const prog=gl.createProgram();
+  gl.attachShader(prog,mk(gl.VERTEX_SHADER,VS));
+  gl.attachShader(prog,mk(gl.FRAGMENT_SHADER,fsSrc));
+  gl.linkProgram(prog);gl.useProgram(prog);
+  const buf=gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]),gl.STATIC_DRAW);
+  const pos=gl.getAttribLocation(prog,'position');
+  gl.enableVertexAttribArray(pos);gl.vertexAttribPointer(pos,2,gl.FLOAT,false,0,0);
+  const lRes=gl.getUniformLocation(prog,'u_resolution');
+  const lT=gl.getUniformLocation(prog,'u_time');
+  const lM=gl.getUniformLocation(prog,'u_mouse');
+  const resize=()=>{
+    const d=Math.min(window.devicePixelRatio||1,2);
+    canvas.width=innerWidth*d;canvas.height=innerHeight*d;
+    gl.viewport(0,0,canvas.width,canvas.height);
+  };
+  addEventListener('resize',resize);resize();
+  return (tSec)=>{
+    gl.uniform2f(lRes,canvas.width,canvas.height);
+    gl.uniform1f(lT,tSec);
+    gl.uniform2f(lM,mouse.x,1-mouse.y);
+    gl.drawArrays(gl.TRIANGLES,0,6);
+    return true;
+  };
+}
+let drawDark=null, drawLight=null, glRAF=0, glT0=Date.now();
+function startGL(){
+  if(window.__lowPowerMode || glRAF) return;
+  if(!drawDark) drawDark=bootGL('bg-dark',FS_DARK);
+  if(!drawLight) drawLight=bootGL('bg-light',FS_LIGHT);
+  glT0=Date.now();
+  function loop(){
+    if(window.__lowPowerMode){glRAF=0;return;}
+    const t=(Date.now()-glT0)/1000;
+    drawDark(t);drawLight(t);
+    glRAF=requestAnimationFrame(loop);
+  }
+  glRAF=requestAnimationFrame(loop);
+}
+function stopGL(){
+  if(glRAF) cancelAnimationFrame(glRAF);
+  glRAF=0;
+}
+startGL();
+addEventListener('ppt-low-power-change', e=>{e.detail.on ? stopGL() : startGL();});
+
+// =============== 导航（翻页 / 圆点 / 键盘 / 滚轮 / 触屏） ===============
+const deck=document.getElementById('deck');
+const slides=deck.querySelectorAll('.slide');
+const nav=document.getElementById('nav');
+let idx=0,total=slides.length,lock=false;
+// Restore slide from URL hash on refresh
+(function(){var m=location.hash.match(/^#slide-(\d+)$/);if(m){var n=parseInt(m[1]);if(n>=0&&n<total)idx=n;}})();
+
+// Inject logo into each .chrome, right of the counter
+(function(){
+  const logo=document.getElementById('global-logo');
+  if(!logo)return;
+  document.querySelectorAll('.chrome').forEach(ch=>{
+    const counter=ch.children[1];
+    if(!counter)return;
+    const wrapper=document.createElement('div');
+    wrapper.style.cssText='display:flex;align-items:center;gap:1.2em';
+    counter.parentNode.insertBefore(wrapper,counter);
+    wrapper.appendChild(counter);
+    const img=document.createElement('img');
+    img.src=logo.src;
+    img.alt='Tuya';
+    img.className='chrome-logo';
+    img.style.cssText='height:22px;width:auto;opacity:.75;filter:grayscale(1) brightness(0)';
+    wrapper.appendChild(img);
+  });
+  logo.remove();
+})();
+
+// 关键：矫正 deck 宽度为 total * 100vw，否则翻页会错位
+deck.style.width=(total*100)+'vw';
+
+slides.forEach((s,i)=>{
+  const b=document.createElement('button');
+  b.className='dot';b.dataset.i=i;b.setAttribute('aria-label','Page '+(i+1));
+  b.onclick=()=>go(i);
+  nav.appendChild(b);
+});
+
+function go(n){
+  if(lock)return;
+  idx=Math.max(0,Math.min(total-1,n));
+  location.hash='#slide-'+idx;
+  window.__currentSlideIndex = idx;
+  deck.style.transform=`translateX(${-idx*100}vw)`;
+  nav.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
+  /* 主题切换：优先读 data-theme，其次从 class（light/dark）推断 */
+  const el=slides[idx];
+  const th=el.dataset.theme || (el.classList.contains('light')?'light':(el.classList.contains('dark')?'dark':'dark'));
+  document.body.classList.toggle('light-bg',th==='light');
+  /* Logo: update filter per slide theme */
+  document.querySelectorAll('.chrome-logo').forEach(img=>{
+    img.style.filter=th==='light'?'grayscale(1) brightness(0)':'grayscale(1) brightness(0) invert(1)';
+  });
+  /* 动效：翻页过渡中段触发当前页的入场动画（由 motion-boot 注册） */
+  if(window.__playSlide) setTimeout(()=>window.__playSlide(idx), 450);
+  lock=true;setTimeout(()=>lock=false,700);
+}
+
+/* =============== ESC 索引视图 =============== */
+let overviewOn=false;
+const ov=document.createElement('div');
+ov.id='overview';
+ov.style.cssText='position:fixed;inset:0;z-index:100;background:rgba(var(--ink-rgb),.92);backdrop-filter:blur(12px);display:none;overflow-y:auto;padding:4vh 4vw';
+document.body.appendChild(ov);
+
+function buildOverview(){
+  ov.innerHTML='';
+  const grid=document.createElement('div');
+  grid.style.cssText='display:grid;grid-template-columns:repeat(4,1fr);gap:2vh 1.6vw;max-width:90vw;margin:0 auto';
+  slides.forEach((s,i)=>{
+    const card=document.createElement('div');
+    card.style.cssText='cursor:pointer;border-radius:6px;overflow:hidden;border:2px solid '+(i===idx?'rgba(var(--paper-rgb),.8)':'rgba(var(--paper-rgb),.15)')+';transition:border-color .2s';
+    card.onmouseenter=()=>card.style.borderColor='rgba(var(--paper-rgb),.6)';
+    card.onmouseleave=()=>card.style.borderColor=i===idx?'rgba(var(--paper-rgb),.8)':'rgba(var(--paper-rgb),.15)';
+    const wrap=document.createElement('div');
+    wrap.style.cssText='width:100%;aspect-ratio:16/9;overflow:hidden;position:relative;pointer-events:none;background:'+(s.classList.contains('light')?'var(--paper)':'var(--ink)');
+    const clone=s.cloneNode(true);
+    clone.style.cssText='width:100vw;height:100vh;transform:scale('+(1/4.5)+');transform-origin:top left;position:absolute;top:0;left:0;pointer-events:none';
+    wrap.appendChild(clone);
+    const label=document.createElement('div');
+    label.style.cssText='padding:6px 10px;font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--paper);opacity:.7';
+    label.textContent=(i+1)+' / '+total;
+    card.appendChild(wrap);
+    card.appendChild(label);
+    card.onclick=()=>{toggleOverview();go(i)};
+    grid.appendChild(card);
+  });
+  ov.appendChild(grid);
+}
+
+function toggleOverview(){
+  overviewOn=!overviewOn;
+  if(overviewOn){buildOverview();ov.style.display='block';}
+  else{ov.style.display='none';}
+}
+
+addEventListener('keydown',e=>{
+  if(e.key==='Escape'){e.preventDefault();toggleOverview();return;}
+  if(e.key && e.key.toLowerCase()==='b' && !e.metaKey && !e.ctrlKey && !e.altKey){
+    e.preventDefault();
+    window.__setLowPowerMode(!window.__lowPowerMode);
+    return;
+  }
+  if(overviewOn)return;
+  if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '||e.key==='ArrowDown'){
+    if(window.__pipeAdvance && window.__pipeAdvance()) return;
+    go(idx+1);
+    return;
+  }
+  if(e.key==='ArrowLeft'||e.key==='PageUp'||e.key==='ArrowUp')go(idx-1);
+  if(e.key==='Home')go(0);
+  if(e.key==='End')go(total-1);
+});
+
+let wheelTO=null,wheelAcc=0;
+addEventListener('wheel',e=>{
+  wheelAcc+=e.deltaY+e.deltaX;
+  if(Math.abs(wheelAcc)>50){
+    if(wheelAcc>0 && window.__pipeAdvance && window.__pipeAdvance()){
+      wheelAcc=0;
+    }else{
+      go(idx+(wheelAcc>0?1:-1));wheelAcc=0;
+    }
+  }
+  clearTimeout(wheelTO);wheelTO=setTimeout(()=>wheelAcc=0,150);
+},{passive:true});
+
+let tx=0,ty=0;
+addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY},{passive:true});
+addEventListener('touchend',e=>{
+  const dx=(e.changedTouches[0].clientX-tx);
+  const dy=(e.changedTouches[0].clientY-ty);
+  if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)){
+    if(dx<0 && window.__pipeAdvance && window.__pipeAdvance()) return;
+    go(idx+(dx<0?1:-1));
+  }
+},{passive:true});
+
+go(idx);
+</script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>lucide.createIcons();</script>
+
+<!-- ============ Motion One 动效引擎（本地优先,CDN 兜底） ============
+     加载策略:先 ./assets/motion.min.js(本地,离线可用),失败 fallback 到 jsDelivr CDN
+     加载完成后挂 window.__playSlide / window.__pipeAdvance,
+     导航脚本会在翻页中段调用 __playSlide(idx),键盘/滚轮/触屏会在翻页前调用 __pipeAdvance()
+     双双失败时会兜底把所有 [data-anim] 设为可见,不让动效破坏阅读
+-->
+<script type="module">
+let motion;
+try {
+  motion = await import('./assets/motion.min.js');
+} catch(e1) {
+  try {
+    motion = await import('https://cdn.jsdelivr.net/npm/motion@11.11.17/+esm');
+  } catch(e2) {
+    console.warn('[motion] local + CDN both failed, disabling animations', e1, e2);
+    document.querySelectorAll('[data-anim]').forEach(el=>{el.style.opacity='1';el.style.transform='none'});
+    document.querySelectorAll('[data-animate="pipeline"] [data-anim]').forEach(el=>el.style.opacity='1');
+  }
+}
+
+if(motion){
+  const { animate, stagger } = motion;
+  document.body.classList.add('motion-ready');
+  const EASE = [.22, 1, .36, 1];
+  const slides = [...document.querySelectorAll('.slide')];
+  let pipeStep = -1;
+  let lastIdx = -1;
+
+  function resetAnims(slide){
+    slide.querySelectorAll('[data-anim]').forEach(el=>{
+      el.style.opacity='';
+      el.style.transform='';
+    });
+  }
+
+  function revealStatic(slide){
+    resetAnims(slide);
+    document.getAnimations?.().forEach(a=>a.cancel());
+    slide.querySelectorAll('[data-anim]').forEach(el=>{
+      el.style.opacity='1';
+      el.style.transform='none';
+    });
+  }
+
+  function playSlide(i){
+    const slide = slides[i];
+    if(!slide) return;
+    lastIdx = i;
+    const recipe = slide.dataset.animate || (slide.classList.contains('hero') ? 'hero' : 'cascade');
+
+    if(window.__lowPowerMode){
+      revealStatic(slide);
+      return;
+    }
+
+    if(recipe === 'pipeline'){
+      pipeStep = -1;
+      slide.querySelectorAll('[data-anim]').forEach(el=>{
+        el.style.opacity='0.15';
+        el.style.transform='none';
+      });
+      return;
+    }
+
+    resetAnims(slide);
+    const all = [...slide.querySelectorAll('[data-anim]')];
+    if(!all.length) return;
+
+    if(recipe === 'directional'){
+      const lefts  = all.filter(el=>el.dataset.anim==='left');
+      const divs   = all.filter(el=>el.dataset.anim==='divider');
+      const rights = all.filter(el=>el.dataset.anim==='right');
+      const others = all.filter(el=>!['left','right','divider'].includes(el.dataset.anim));
+      if(others.length) animate(others, {opacity:[0,1], y:[12,0]}, {duration:.6, delay:stagger(.1, {start:.15}), easing:EASE});
+      if(lefts.length)  animate(lefts,  {opacity:[0,1], x:[-24,0]}, {duration:.8, delay:.35, easing:EASE});
+      if(divs.length)   animate(divs,   {opacity:[0,.25]},          {duration:.5, delay:.9});
+      if(rights.length) animate(rights, {opacity:[0,1], x:[24,0]},  {duration:.8, delay:1.0, easing:EASE});
+      return;
+    }
+
+    if(recipe === 'quote'){
+      const lines = all.filter(el=>el.dataset.anim==='line');
+      const others = all.filter(el=>el.dataset.anim!=='line');
+      if(others.length) animate(others, {opacity:[0,1], y:[8,0]},    {duration:.6, delay:stagger(.12, {start:.2}), easing:EASE});
+      if(lines.length)  animate(lines,  {opacity:[.35,1], y:[10,0]}, {duration:.8, delay:stagger(.55, {start:.5}), easing:EASE});
+      return;
+    }
+
+    if(recipe === 'hero'){
+      animate(all, {opacity:[0,1], y:[14,0]}, {duration:.9, delay:stagger(.16, {start:.2}), easing:EASE});
+      return;
+    }
+
+    // default: cascade
+    animate(all, {opacity:[0,1], y:[16,0]}, {duration:.75, delay:stagger(.1, {start:.15}), easing:EASE});
+  }
+
+  function pipeAdvance(){
+    if(window.__lowPowerMode) return false;
+    const slide = slides[lastIdx];
+    if(!slide || slide.dataset.animate !== 'pipeline') return false;
+    const steps  = [...slide.querySelectorAll('[data-anim="step"]')];
+    const arrows = [...slide.querySelectorAll('[data-anim="arrow"]')];
+    if(pipeStep >= steps.length - 1) return false;
+    pipeStep++;
+    animate(steps[pipeStep], {opacity:[0.15,1], y:[8,0]}, {duration:.5, easing:EASE});
+    if(pipeStep > 0 && arrows[pipeStep-1]){
+      animate(arrows[pipeStep-1], {opacity:[0.15,.7]}, {duration:.3, delay:.15});
+    }
+    return true;
+  }
+
+  window.__playSlide = playSlide;
+  window.__pipeAdvance = pipeAdvance;
+
+  // 首屏:触发当前页的入场动画
+  playSlide(idx);
+
+  // === IDE Overview Interactive Panel Logic ===
+  (function(){
+    const slide = document.getElementById('ide-overview-slide');
+    if(!slide) return;
+    const btns = slide.querySelectorAll('.ide-nav-btn');
+    const panels = slide.querySelectorAll('.ide-panel');
+    let currentPanel = 0;
+    const totalPanels = btns.length;
+    const slideIdx = Array.from(slides).indexOf(slide);
+
+    function showPanel(i){
+      if(i<0||i>=totalPanels) return;
+      currentPanel = i;
+      btns.forEach((b,bi)=>{
+        if(bi===i){b.style.background='var(--ink)';b.style.color='var(--paper)';}
+        else{b.style.background='transparent';b.style.color='var(--ink)';}
+      });
+      panels.forEach((p,pi)=>{
+        if(pi===i){p.style.opacity='1';p.style.pointerEvents='auto';}
+        else{p.style.opacity='0';p.style.pointerEvents='none';}
+      });
+    }
+
+    btns.forEach((b,i)=>b.addEventListener('click',()=>showPanel(i)));
+
+    // Hook into PPT navigation
+    const origPipeAdvance = window.__pipeAdvance;
+    window.__pipeAdvance = function(){
+      if((window.__currentSlideIndex||0) === slideIdx && currentPanel < totalPanels - 1){
+        showPanel(currentPanel + 1);
+        return true;
+      }
+      if(origPipeAdvance) return origPipeAdvance();
+      return false;
+    };
+
+    // Reset panel when entering this slide
+    const origPlaySlide = window.__playSlide;
+    window.__playSlide = function(i){
+      if(i === slideIdx) showPanel(0);
+      if(origPlaySlide) origPlaySlide(i);
+    };
+  })();
+}
+
+// =============== Firework Effect (Page 8) ===============
+(function(){
+  const canvas = document.getElementById('firework-canvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const slideEl = document.getElementById('slide-firework');
+  const slideIndex = Array.from(document.querySelectorAll('.slide')).indexOf(slideEl);
+  let particles = [], rockets = [], raf = 0, active = false;
+
+  function resize(){
+    const dpr = Math.min(window.devicePixelRatio||1, 2);
+    canvas.width = canvas.offsetWidth * dpr;
+    canvas.height = canvas.offsetHeight * dpr;
+    ctx.scale(dpr, dpr);
+  }
+  window.addEventListener('resize', resize);
+
+  const colors = [
+    '#ff3300','#ff0066','#cc00ff','#3399ff','#00ffcc',
+    '#ffee00','#00ff66','#ff6600','#ff0033','#9933ff'
+  ];
+
+  function rand(a,b){ return Math.random()*(b-a)+a; }
+
+  function Particle(x,y,color){
+    this.x=x; this.y=y;
+    this.color=color;
+    const angle=rand(0,Math.PI*2);
+    const speed=rand(2,7.5);
+    this.vx=Math.cos(angle)*speed;
+    this.vy=Math.sin(angle)*speed;
+    this.alpha=1;
+    this.decay=rand(0.01,0.02);
+    this.size=rand(2,4.5);
+  }
+
+  function Rocket(x,targetY){
+    this.x=x;
+    this.y=canvas.offsetHeight;
+    this.targetY=targetY;
+    this.vy=-rand(8,13);
+    this.alpha=1;
+    this.color=colors[Math.floor(rand(0,colors.length))];
+    this.trail=[];
+  }
+
+  function spawnRocket(){
+    const x=rand(canvas.offsetWidth*0.1, canvas.offsetWidth*0.9);
+    const targetY=rand(canvas.offsetHeight*0.1, canvas.offsetHeight*0.45);
+    rockets.push(new Rocket(x, targetY));
+  }
+
+  function explode(x,y,color){
+    const count=Math.floor(rand(50,90));
+    const palette=[color];
+    for(let i=0;i<2;i++) palette.push(colors[Math.floor(rand(0,colors.length))]);
+    for(let i=0;i<count;i++){
+      particles.push(new Particle(x,y,palette[Math.floor(rand(0,palette.length))]));
+    }
+  }
+
+  let lastSpawn=0;
+  function loop(ts){
+    if(!active){raf=0;return;}
+    raf=requestAnimationFrame(loop);
+    const w=canvas.offsetWidth, h=canvas.offsetHeight;
+    ctx.clearRect(0,0,w,h);
+
+    if(ts-lastSpawn > rand(900,1800)){
+      spawnRocket();
+      lastSpawn=ts;
+    }
+
+    for(let i=rockets.length-1;i>=0;i--){
+      const r=rockets[i];
+      r.trail.push({x:r.x+rand(-0.8,0.8),y:r.y,alpha:1,size:rand(2,4)});
+      if(r.trail.length>22) r.trail.shift();
+      r.y+=r.vy;
+      r.vy+=0.15;
+      // Fire trail with gradient glow
+      for(let ti=0;ti<r.trail.length;ti++){
+        const t=r.trail[ti];
+        const life=ti/r.trail.length;
+        const sz=t.size*(0.2+life*0.8);
+        // Outer glow
+        const grad=ctx.createRadialGradient(t.x,t.y,0,t.x,t.y,sz*3);
+        grad.addColorStop(0,`rgba(255,${Math.floor(120+life*135)},${Math.floor(life*60)},${life*0.4})`);
+        grad.addColorStop(1,'rgba(255,80,0,0)');
+        ctx.beginPath();
+        ctx.arc(t.x,t.y,sz*3,0,Math.PI*2);
+        ctx.fillStyle=grad;
+        ctx.fill();
+        // Core spark
+        ctx.beginPath();
+        ctx.arc(t.x,t.y,sz,0,Math.PI*2);
+        ctx.fillStyle=`rgba(255,${Math.floor(200+life*55)},${Math.floor(50+life*150)},${life*0.9})`;
+        ctx.fill();
+      }
+      // Bright rocket head with glow
+      const headGrad=ctx.createRadialGradient(r.x,r.y,0,r.x,r.y,8);
+      headGrad.addColorStop(0,'rgba(255,255,255,1)');
+      headGrad.addColorStop(0.3,'rgba(255,220,100,0.8)');
+      headGrad.addColorStop(1,'rgba(255,120,0,0)');
+      ctx.beginPath();
+      ctx.arc(r.x,r.y,8,0,Math.PI*2);
+      ctx.fillStyle=headGrad;
+      ctx.fill();
+      // Emit rising sparks
+      if(Math.random()<0.6){
+        particles.push({
+          x:r.x+rand(-2,2), y:r.y+rand(0,4),
+          vx:rand(-0.5,0.5), vy:rand(0.5,2),
+          alpha:rand(0.6,1), decay:rand(0.03,0.06),
+          size:rand(1,2), color:`hsl(${rand(20,50)},100%,${rand(50,80)}%)`
+        });
+      }
+      if(r.vy>=0 || r.y<=r.targetY){
+        explode(r.x,r.y,r.color);
+        rockets.splice(i,1);
+      }
+    }
+
+    for(let i=particles.length-1;i>=0;i--){
+      const p=particles[i];
+      p.x+=p.vx;
+      p.y+=p.vy;
+      p.vy+=0.06;
+      p.vx*=0.985;
+      p.alpha-=p.decay;
+      if(p.alpha<=0){particles.splice(i,1);continue;}
+      // Outer glow
+      ctx.globalAlpha=p.alpha*0.4;
+      const glow=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.size*4);
+      glow.addColorStop(0,p.color);
+      glow.addColorStop(1,'transparent');
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.size*4,0,Math.PI*2);
+      ctx.fillStyle=glow;
+      ctx.fill();
+      // Bright core
+      ctx.globalAlpha=p.alpha;
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+      ctx.fillStyle=p.color;
+      ctx.fill();
+      // White-hot center
+      ctx.globalAlpha=p.alpha*0.7;
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.size*0.4,0,Math.PI*2);
+      ctx.fillStyle='#fff';
+      ctx.fill();
+    }
+    ctx.globalAlpha=1;
+  }
+
+  function start(){
+    if(active) return;
+    active=true;
+    resize();
+    particles=[];rockets=[];lastSpawn=0;
+    // Spawn initial rockets immediately so fireworks appear instantly
+    for(let i=0;i<3;i++) spawnRocket();
+    raf=requestAnimationFrame(loop);
+  }
+  function stop(){
+    active=false;
+    if(raf) cancelAnimationFrame(raf);
+    raf=0;
+    ctx.clearRect(0,0,canvas.offsetWidth,canvas.offsetHeight);
+  }
+
+  const origGo = window.go || null;
+  const checkSlide=()=>{
+    if(window.__currentSlideIndex===slideIndex) start(); else stop();
+  };
+  const _origPlaySlide = window.__playSlide;
+  const _origPlaySlide2 = window.__playSlide;
+  setInterval(checkSlide, 300);
+  if(window.__currentSlideIndex===slideIndex) start();
+})();
+</script>
+</body>
+</html>
