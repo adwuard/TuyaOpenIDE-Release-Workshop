@@ -734,90 +734,55 @@
   </div>
 </section>
 
-<!-- ===== 02 · Industry Contrast ===== -->
+<!-- ===== 02 · Pain Points (merged: gap + 4 pains) ===== -->
 <section class="slide light">
   <div class="chrome">
-    <div>行业现状 · The Gap</div>
-    <div>Act I · 02 / 25</div>
+    <div>硬件痛点 · The Pain</div>
+    <div>Act I · 02 / 18</div>
   </div>
   <div class="frame" style="padding-top:6vh">
     <div class="kicker" data-anim>一个残酷的对比</div>
-    <h2 class="h-xl" data-anim>AI 颠覆了软件<br/>硬件还在 20 年前</h2>
-    <p class="lead" style="margin-bottom:5vh" data-anim>全球 AIoT 市场 2026 年将达 1.5 万亿美元，但硬件开发效率比软件低 10-20 倍。<span style="font-family:var(--mono);font-size:max(9px,.7vw);letter-spacing:.1em;opacity:.45"> — IoT Analytics 2025</span></p>
-    <div class="grid-3" style="margin-top:4vh">
-      <div class="stat-card" data-anim>
-        <div class="stat-label">Software</div>
-        <div class="stat-nb" style="color:#4caf50">1 <span class="stat-unit">周</span></div>
-        <div class="stat-note">用 Cursor/Claude 写一个 SaaS 应用上线</div>
-        <div style="font-family:var(--mono);font-size:max(9px,.7vw);letter-spacing:.12em;opacity:.4;margin-top:.8vh">— 内部工程效率测算</div>
+    <h2 class="h-xl" data-anim>软件 1 周<br/>硬件却要 1 个月+</h2>
+    <p class="lead" style="margin-bottom:4vh" data-anim>90% 的硬件项目死在原型到量产的路上。<span style="opacity:.7">四个核心痛点，拖慢了一切。</span><span style="font-family:var(--mono);font-size:max(9px,.7vw);letter-spacing:.1em;opacity:.45"> — CB Insights / 内部测算</span></p>
+    <div class="pipeline" data-cols="4" style="margin-top:3vh">
+      <div class="step accent-top" data-anim>
+        <div class="step-nb" style="color:#e53935">痛点 1</div>
+        <div class="step-title" style="color:#e53935">环境配置地狱</div>
+        <div class="step-desc">每颗芯片各有工具链与 SDK 版本，配好环境平均 15-20 个工作日。</div>
       </div>
-      <div class="stat-card" data-anim>
-        <div class="stat-label" style="color:#e53935">但是硬件要：</div>
-        <div class="stat-nb" style="color:#e53935">1 <span class="stat-unit">月+</span></div>
-        <div class="stat-note">做一个最简单的联网温湿度传感器</div>
-        <div style="font-family:var(--mono);font-size:max(9px,.7vw);letter-spacing:.12em;opacity:.4;margin-top:.8vh">— 内部工程效率测算</div>
+      <div class="step accent-top" data-anim>
+        <div class="step-nb" style="color:#e53935">痛点 2</div>
+        <div class="step-title" style="color:#e53935">AI 的"硬件盲"</div>
+        <div class="step-desc">通用 AI 不懂你的板子、引脚与 DP 协议，没有硬件上下文几乎无用。</div>
       </div>
-      <div class="stat-card accent-top" data-anim>
-        <div class="stat-label">Failure Rate</div>
-        <div class="stat-nb" style="color:#e53935">90<span class="stat-unit">%</span></div>
-        <div class="stat-note" style="color:#e53935">硬件项目死在原型到量产的路上</div>
-        <div style="font-family:var(--mono);font-size:max(9px,.7vw);letter-spacing:.12em;opacity:.4;margin-top:.8vh">— CB Insights Hardware Report</div>
+      <div class="step accent-top" data-anim>
+        <div class="step-nb" style="color:#ff6b35">痛点 3</div>
+        <div class="step-title" style="color:#ff6b35">工具切换灾难</div>
+        <div class="step-desc">一天在 Keil / 串口 / 云平台 / App / Postman 间切换 50+ 次。</div>
       </div>
-    </div>
-  </div>
-  <div class="foot">
-    <div>软件 1 人 1 周 vs 硬件 1 人 1 月 — 10x 效率差距</div>
-    <div>— · —</div>
-  </div>
-</section>
-
-<!-- ===== 03 · Three Trends ===== -->
-<section class="slide light">
-  <div class="chrome">
-    <div>行业趋势 · Trends</div>
-    <div>Act I · 03 / 25</div>
-  </div>
-  <div class="frame" style="padding-top:6vh">
-    <div class="kicker" data-anim>三大不可逆趋势</div>
-    <h2 class="h-xl" data-anim>矛盾正在激化</h2>
-    <p class="lead" style="margin-bottom:5vh" data-anim>能力在爆发，工具没跟上。</p>
-    <div class="grid-3" style="margin-top:4vh">
-      <div class="stat-card" data-anim>
-        <div class="stat-label">AI Penetration</div>
-        <div class="stat-nb">&lt;5<span class="stat-unit">%</span></div>
-        <div class="stat-note">大模型编码能力已接近中级工程师，但硬件领域 AI 渗透率不足 5%</div>
-        <div style="font-family:var(--mono);font-size:max(9px,.7vw);letter-spacing:.12em;opacity:.4;margin-top:.8vh">— McKinsey AI Survey 2025</div>
-      </div>
-      <div class="stat-card" data-anim>
-        <div class="stat-label">New Chips / Year</div>
-        <div class="stat-nb">100<span class="stat-unit">+</span></div>
-        <div class="stat-note">每年新增 100+ 款 IoT 芯片，没有统一的开发工具和抽象层</div>
-        <div style="font-family:var(--mono);font-size:max(9px,.7vw);letter-spacing:.12em;opacity:.4;margin-top:.8vh">— IC Insights 2025</div>
-      </div>
-      <div class="stat-card accent-top" data-anim>
-        <div class="stat-label">Talent Gap</div>
-        <div class="stat-nb">10M<span class="stat-unit">+</span></div>
-        <div class="stat-note">智能设备需要全栈能力，全栈硬件工程师缺口超 1000 万</div>
-        <div style="font-family:var(--mono);font-size:max(9px,.7vw);letter-spacing:.12em;opacity:.4;margin-top:.8vh">— 中国电子信息产业发展研究院</div>
+      <div class="step accent-top" data-anim>
+        <div class="step-nb" style="color:#ff6b35">痛点 4</div>
+        <div class="step-title" style="color:#ff6b35">全栈困局</div>
+        <div class="step-desc">嵌入式 + 后端 + 前端，3 人团队才能做出一个完整产品。</div>
       </div>
     </div>
   </div>
   <div class="foot">
-    <div>AI 能力爆发 × 芯片碎片化 × 全栈化要求</div>
+    <div>软件 1 人 1 周 vs 硬件 3 人 1 月 — 10x 效率差距</div>
     <div>— · —</div>
   </div>
 </section>
 
-<!-- ===== 04 · Timeline ===== -->
+<!-- ===== 03 · Timeline + Trends (merged) ===== -->
 <section class="slide light">
   <div class="chrome">
-    <div>历史演进 · Evolution</div>
-    <div>Act I · 04 / 25</div>
+    <div>为什么是现在 · Why Now</div>
+    <div>Act I · 03 / 18</div>
   </div>
   <div class="frame" style="padding-top:4vh">
     <div class="kicker" data-anim>硬件开发正处于"前夜"</div>
     <h2 class="h-xl" data-anim>每个时代都需要一个 IDE</h2>
-    <p class="lead" style="margin-bottom:6vh" data-anim>我们需要一个为 AI 设计的硬件开发 IDE。</p>
+    <p class="lead" style="margin-bottom:6vh" data-anim>AI 渗透率不足 5%、每年 100+ 新芯片、全栈人才缺口超千万 —— 硬件开发正等待属于它的 IDE。</p>
 
     <!-- Timeline with arrows -->
     <div data-anim style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:4vh;align-items:stretch">
@@ -861,7 +826,7 @@
 <section class="slide light">
   <div class="chrome">
     <div>工具对比 · Comparison</div>
-    <div>Act I · 05 / 25</div>
+    <div>Act I · 04 / 18</div>
   </div>
   <div class="frame" style="padding-top:4vh">
     <div class="kicker" data-anim>现有工具的局限</div>
@@ -922,102 +887,15 @@
   </div>
 </section>
 
-<!-- ===== 06 · Chapter: Pain Points ===== -->
-<section class="slide hero dark">
-  <div class="chrome">
-    <div>第二幕 · 痛点剖析</div>
-    <div>Act II · 06 / 25</div>
-  </div>
-  <div class="frame" style="display:grid; gap:6vh; align-content:center; min-height:80vh">
-    <div class="kicker" data-anim>Act II</div>
-    <h1 class="h-hero" style="font-size:8vw" data-anim>隐形<span class="glitch-text" style="color:#e53935;display:inline-block;position:relative" data-text="痛苦">痛苦</span></h1>
-    <p class="lead" style="max-width:55vw" data-anim>
-      作为硬件开发者，你每天都在经历的四大核心痛点。
-    </p>
-  </div>
-  <div class="foot">
-    <div>80% 的时间都在做重复、机械、没有创造性的工作</div>
-    <div>— · —</div>
-  </div>
-</section>
-
-<!-- ===== 06 · Pain Points 1+2 ===== -->
-<section class="slide dark">
-  <div class="chrome">
-    <div>痛点 · Pain Points</div>
-    <div>Act II · 07 / 25</div>
-  </div>
-  <div class="frame" style="padding-top:4vh">
-    <div class="kicker" data-anim>环境与 AI 的双重困境</div>
-    <h2 class="h-xl" data-anim>配置地狱 × AI 盲区</h2>
-    <p class="lead" style="margin-bottom:4vh" data-anim>新工程师入职花一周配环境；让 ChatGPT 写驱动，10 版没一版能编译。</p>
-    <div class="pipeline" data-cols="3" style="margin-top:4vh">
-      <div class="step accent-top" data-anim>
-        <div class="step-nb" style="color:#e53935">痛点 1</div>
-        <div class="step-title" style="color:#e53935">环境配置地狱</div>
-        <div class="step-desc">每个芯片都有自己的工具链和 SDK 版本。平均花费 15-20 个工作日。</div>
-      </div>
-      <div class="step accent-top" data-anim>
-        <div class="step-nb" style="color:#e53935">痛点 2</div>
-        <div class="step-title" style="color:#e53935">AI 的"硬件盲"</div>
-        <div class="step-desc">通用 AI 不懂你的板子、引脚定义和 DP 协议。没有硬件上下文的 AI 几乎无用。</div>
-      </div>
-      <div class="step" data-anim>
-        <div class="step-nb" style="color:#4caf50">结论</div>
-        <div class="step-title" style="color:#4caf50">需要硬件感知</div>
-        <div class="step-desc">AI 必须理解具体的硬件上下文，才能生成可用的嵌入式代码。</div>
-      </div>
-    </div>
-  </div>
-  <div class="foot">
-    <div>没有硬件上下文的 AI — 对嵌入式开发几乎无用</div>
-    <div>— · —</div>
-  </div>
-</section>
-
-<!-- ===== 07 · Pain Points 3+4 ===== -->
-<section class="slide dark">
-  <div class="chrome">
-    <div>痛点 · Pain Points</div>
-    <div>Act II · 08 / 25</div>
-  </div>
-  <div class="frame" style="padding-top:4vh">
-    <div class="kicker" data-anim>工具碎片化与能力断层</div>
-    <h2 class="h-xl" data-anim><span style="color:#e53935">切换灾难</span> × <span style="color:#ff6b35">全栈困局</span></h2>
-    <p class="lead" style="margin-bottom:4vh" data-anim>一天切换 <strong style="color:#e53935">5 个工具 50 次</strong>；<strong style="color:#ff6b35">3 人团队</strong>才能做一个完整产品。</p>
-    <div class="grid-3" style="margin-top:4vh">
-      <div class="stat-card" data-anim>
-        <div class="stat-label">Daily Switches</div>
-        <div class="stat-nb" style="color:#e53935">50<span class="stat-unit">+</span></div>
-        <div class="stat-note"><span style="opacity:.6">Keil</span> + <span style="opacity:.6">串口</span> + <span style="opacity:.6">云平台</span> + <span style="opacity:.6">APP 开发</span> + <span style="opacity:.6">Postman</span>，<strong>注意力严重分散</strong></div>
-      </div>
-      <div class="stat-card" data-anim>
-        <div class="stat-label">Min Team Size</div>
-        <div class="stat-nb" style="color:#ff6b35">3 <span class="stat-unit">人</span></div>
-        <div class="stat-note"><strong>嵌入式</strong> + <strong>后端</strong> + <strong>前端</strong>，缺一不可</div>
-      </div>
-      <div class="stat-card accent-top" data-anim>
-        <div class="stat-label">Solo Devs Blocked</div>
-        <div class="stat-nb" style="color:#e53935">90<span class="stat-unit">%</span></div>
-        <div class="stat-note">个人开发者<strong style="color:#e53935">无法完成</strong>完整智能硬件产品</div>
-      </div>
-    </div>
-  </div>
-  <div class="foot">
-    <div>硬件 + 固件 + 云 + App — 四个领域完全割裂</div>
-    <div>— · —</div>
-  </div>
-</section>
-
-<!-- ===== 08 · Chapter: Our Answer ===== -->
+<!-- ===== 05 · Chapter: Our Answer ===== -->
 <section class="slide hero dark" id="slide-firework">
   <canvas id="firework-canvas" style="position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;filter:blur(5px)"></canvas>
   <div class="chrome" style="position:relative;z-index:2">
-    <div>第三幕 · 产品发布</div>
-    <div>Act III · 09 / 25</div>
+    <div>第二幕 · 产品发布</div>
+    <div>Act II · 05 / 18</div>
   </div>
   <div class="frame" style="display:grid; gap:5vh; align-content:center; min-height:76vh; padding-top:2vh;position:relative;z-index:2">
-    <div class="kicker" data-anim>Act III · Our Answer</div>
+    <div class="kicker" data-anim>Act II · Our Answer</div>
     <h1 class="h-hero" style="font-size:7vw;line-height:1.15;padding-bottom:.1em;background:linear-gradient(135deg,#ff6b35 0%,#e91e63 25%,#9c27b0 50%,#2196f3 75%,#00bcd4 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text" data-anim>TuyaOpen IDE</h1>
     <p class="lead" style="max-width:60vw" data-anim>
       世界上第一个为 AI 时代设计的全栈硬件开发工具。
@@ -1036,7 +914,7 @@
 <section class="slide dark">
   <div class="chrome">
     <div>突破 1 · Vibe Coding</div>
-    <div>Act III · 10 / 25</div>
+    <div>Act II · 06 / 18</div>
   </div>
   <div class="frame" style="padding-top:4vh">
     <div class="kicker" data-anim>AI 原生的开发体验</div>
@@ -1078,57 +956,11 @@
   </div>
 </section>
 
-<!-- ===== 10 · Breakthrough 2: All-in-One ===== -->
-<section class="slide light">
-  <div class="chrome">
-    <div>突破 2 · All-in-One</div>
-    <div>Act III · 11 / 25</div>
-  </div>
-  <div class="frame" style="padding-top:4vh">
-    <div class="kicker" data-anim>App / Cloud / Hardware 三合一</div>
-    <h2 class="h-xl" data-anim>一个 IDE 搞定<span style="background:linear-gradient(135deg,#2196f3,#00bcd4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">全栈</span></h2>
-    <p class="lead" style="margin-bottom:4vh" data-anim>从"<strong>3 个人 3 个月</strong>"变成"<strong style="color:#ff6b35">1 个人 1 周</strong>"。</p>
-    <div class="pipeline" data-cols="3" style="margin-top:5vh">
-      <div class="step accent-top" data-anim>
-        <div class="step-nb">固件</div>
-        <div class="step-title">Firmware</div>
-        <div class="step-desc">C/C++ 原生支持，自动引脚映射，一键编译烧录</div>
-      </div>
-      <div class="step accent-top" data-anim>
-        <div class="step-nb">云端</div>
-        <div class="step-title">Cloud</div>
-        <div class="step-desc">AI 自动生成云 Agent，数据点同步，一键部署</div>
-      </div>
-      <div class="step accent-top" data-anim>
-        <div class="step-nb">应用</div>
-        <div class="step-title">App</div>
-        <div class="step-desc">拖拽式面板设计，自动生成 MiniApp 代码</div>
-      </div>
-    </div>
-    <!-- Three feature images -->
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.4vw;margin-top:3vh" data-anim>
-      <figure class="frame-img h-18 fit-contain" style="background:var(--paper)">
-        <img src="images/t5-core.png" alt="Firmware - T5 Board">
-      </figure>
-      <figure class="frame-img h-18 fit-contain" style="background:var(--paper)">
-        <img src="images/cloud-agent.png" alt="Cloud Agent">
-      </figure>
-      <figure class="frame-img h-18 fit-contain" style="background:var(--paper)">
-        <img src="images/app-panel.png" alt="App Panel">
-      </figure>
-    </div>
-  </div>
-  <div class="foot">
-    <div>Firmware + Cloud + App — 不再割裂</div>
-    <div>— · —</div>
-  </div>
-</section>
-
 <!-- ===== 11 · Breakthrough 3: Ecosystem ===== -->
 <section class="slide dark">
   <div class="chrome">
-    <div>突破 3 · Ecosystem</div>
-    <div>Act III · 12 / 25</div>
+    <div>突破 2 · Ecosystem</div>
+    <div>Act II · 07 / 18</div>
   </div>
   <div class="frame" style="padding-top:2vh">
     <div style="display:grid;grid-template-columns:7fr 5fr;gap:2vw;align-items:center">
@@ -1181,51 +1013,17 @@
   </div>
 </section>
 
-<!-- ===== 13 · Transition: Feature Walkthrough Preview ===== -->
+<!-- ===== 08 · Chapter: Feature Walkthrough ===== -->
 <section class="slide hero dark">
   <div class="chrome">
-    <div>预览 · Feature Walkthrough</div>
-    <div>Act III → IV · 13 / 25</div>
-  </div>
-  <div class="frame" style="display:grid; gap:4vh; align-content:center; min-height:76vh">
-    <div class="kicker" data-anim>接下来</div>
-    <h1 class="h-hero" style="font-size:6.5vw" data-anim>带你速览<br/>全栈功能</h1>
-    <p class="lead" style="max-width:60vw" data-anim>从一句话生成固件，到云端 Agent 与小程序面板 —— 一个 IDE 覆盖智能硬件全链路。</p>
-    <div class="grid-3" style="margin-top:3vh">
-      <div class="stat-card" data-anim>
-        <div class="stat-label">Firmware</div>
-        <div class="stat-nb" style="font-size:3.2vw">固件 · Vibe Coding</div>
-        <div class="stat-note">自然语言生成、编译、烧录、闭环调试</div>
-      </div>
-      <div class="stat-card" data-anim>
-        <div class="stat-label">Cloud · Agent</div>
-        <div class="stat-nb" style="font-size:3.2vw">云端 / 智能体</div>
-        <div class="stat-note">绑定产品、定义 DP、创建 AI Agent 与工作流</div>
-      </div>
-      <div class="stat-card accent-top" data-anim>
-        <div class="stat-label">Mini App</div>
-        <div class="stat-nb" style="font-size:3.2vw">小程序面板</div>
-        <div class="stat-note">构建、调试、上传 App 控制面板</div>
-      </div>
-    </div>
-  </div>
-  <div class="foot">
-    <div>Firmware · Cloud · Agent · Mini App — 全栈一体</div>
-    <div>— · —</div>
-  </div>
-</section>
-
-<!-- ===== 14 · Chapter: Feature Walkthrough ===== -->
-<section class="slide hero dark">
-  <div class="chrome">
-    <div>第四幕 · 功能速览</div>
-    <div>Act IV · 14 / 25</div>
+    <div>第三幕 · 功能速览</div>
+    <div>Act III · 08 / 18</div>
   </div>
   <div class="frame" style="display:grid; gap:6vh; align-content:center; min-height:80vh">
-    <div class="kicker" data-anim>Act IV · Feature Walkthrough</div>
+    <div class="kicker" data-anim>Act III · Feature Walkthrough</div>
     <h1 class="h-hero" style="font-size:7.5vw" data-anim>功能速览</h1>
     <p class="lead" style="max-width:60vw" data-anim>
-      耳听为虚，眼见为实。带你逐一走过 TuyaOpen IDE 的核心功能。
+      耳听为虚，眼见为实。从一句话生成固件，到云端 Agent 与小程序面板，逐一走过核心功能。
     </p>
     <p class="lead" style="max-width:60vw;opacity:.7" data-anim>
       界面总览 · 固件 Vibe Coding · 云端 Agent · 小程序面板
@@ -1241,7 +1039,7 @@
 <section class="slide light">
   <div class="chrome">
     <div>快速开始 · Quick Start</div>
-    <div>Act IV · 15 / 25</div>
+    <div>Act III · 09 / 18</div>
   </div>
   <div class="frame" style="padding-top:4vh">
     <div class="kicker" data-anim>四步即可上手</div>
@@ -1295,7 +1093,7 @@
 <section class="slide light" id="ide-overview-slide">
   <div class="chrome">
     <div>IDE 界面总览</div>
-    <div>Act IV · 界面总览</div>
+    <div>Act III · 界面总览</div>
   </div>
   <div class="frame" style="padding-top:3vh">
     <div class="kicker" data-anim>TuyaOpen IDE 界面导览</div>
@@ -1373,7 +1171,7 @@
 <section class="slide dark">
   <div class="chrome">
     <div>Step 1 · Create</div>
-    <div>Act IV · 16 / 25</div>
+    <div>Act III · 10 / 18</div>
   </div>
   <div class="frame" style="padding-top:2vh">
     <div class="kicker" data-anim>第一步</div>
@@ -1430,7 +1228,7 @@
 <section class="slide light">
   <div class="chrome">
     <div>Step 2 · Vibe Coding</div>
-    <div>Act IV · 17 / 25</div>
+    <div>Act III · 11 / 18</div>
   </div>
   <div class="frame" style="padding-top:2vh">
     <div class="kicker" data-anim>核心环节</div>
@@ -1461,7 +1259,7 @@
 <section class="slide light">
   <div class="chrome">
     <div>更多玩法 · Prompts</div>
-    <div>Act IV · 18 / 25</div>
+    <div>Act III · 12 / 18</div>
   </div>
   <div class="frame" style="padding-top:2vh">
     <div class="kicker" data-anim>不止一行命令</div>
@@ -1528,7 +1326,7 @@
 <section class="slide dark">
   <div class="chrome">
     <div>功能速览 · 三端模型</div>
-    <div>Act IV · 19 / 25</div>
+    <div>Act III · 13 / 18</div>
   </div>
   <div class="frame" style="padding-top:4vh">
     <div class="kicker" data-anim>一个项目，三个端</div>
@@ -1566,7 +1364,7 @@
 <section class="slide light">
   <div class="chrome">
     <div>功能速览 · 云端 IoT / Agent</div>
-    <div>Act IV · 20 / 25</div>
+    <div>Act III · 14 / 18</div>
   </div>
   <div class="frame" style="padding-top:3vh">
     <div class="kicker" data-anim>云端 IoT / Agent 开发</div>
@@ -1602,7 +1400,7 @@
 <section class="slide dark">
   <div class="chrome">
     <div>功能速览 · Agent 工作流</div>
-    <div>Act IV · 21 / 25</div>
+    <div>Act III · 15 / 18</div>
   </div>
   <div class="frame" style="padding-top:3vh">
     <div class="kicker" data-anim>Agent · 工作流编排</div>
@@ -1638,7 +1436,7 @@
 <section class="slide light">
   <div class="chrome">
     <div>功能速览 · 小程序面板</div>
-    <div>Act IV · 22 / 25</div>
+    <div>Act III · 16 / 18</div>
   </div>
   <div class="frame" style="padding-top:3vh">
     <div class="kicker" data-anim>小程序面板开发</div>
@@ -1674,7 +1472,7 @@
 <section class="slide hero light">
   <div class="chrome">
     <div>全栈闭环 · Summary</div>
-    <div>Act IV · 23 / 25</div>
+    <div>Act IV · 17 / 18</div>
   </div>
   <div class="frame" style="padding-top:6vh">
     <div class="kicker" data-anim>一个 IDE，全栈闭环</div>
@@ -1701,8 +1499,8 @@
       <p style="font-size:clamp(15px,1.4vw,20px);line-height:1.8;font-weight:500">
         <strong>想象力远不止于此。</strong><br>
         智能门锁、环境监测站、宠物喂食器、农业灌溉系统、工业传感网关……<br>
-        <span style="opacity:.75">你脑中的每一个硬件创意，TuyaOpen IDE 都能帮你从想法走到产品。</span><br>
-        <strong style="background:linear-gradient(135deg,#ff6b35,#e91e63,#9c27b0,#2196f3);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">去创造属于你的 AI 硬件。</strong>
+        <span style="opacity:.75">你只需描述想法，剩下的交给 TuyaOpen IDE。</span><br>
+        <strong style="background:linear-gradient(135deg,#ff6b35,#e91e63,#9c27b0,#2196f3);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">去创造属于你的 AI 硬件 —— 每个人都能成为硬件开发者。</strong>
       </p>
     </div>
   </div>
@@ -1712,30 +1510,11 @@
   </div>
 </section>
 
-<!-- ===== 18 · Vision ===== -->
-<section class="slide hero dark">
-  <div class="chrome">
-    <div>愿景 · Vision</div>
-    <div>24 / 25</div>
-  </div>
-  <div class="frame" style="display:grid; gap:4vh; align-content:center; min-height:80vh">
-    <div class="kicker" data-anim>Our Vision</div>
-    <h1 class="h-hero" style="font-size:6.5vw" data-anim>每个人都能成为<br/>硬件开发者</h1>
-    <p class="lead" style="max-width:60vw" data-anim>
-      你只需要描述你的想法，剩下的交给 TuyaOpen IDE。
-    </p>
-  </div>
-  <div class="foot">
-    <div>Describe it. Build anything.</div>
-    <div>— · —</div>
-  </div>
-</section>
-
-<!-- ===== 19 · Closing & Resources ===== -->
+<!-- ===== 18 · Closing & Resources ===== -->
 <section class="slide light">
   <div class="chrome">
     <div>TuyaOpen IDE · Available Now</div>
-    <div>25 / 25</div>
+    <div>18 / 18</div>
   </div>
   <div class="frame" style="padding-top:6vh">
     <div class="kicker" data-anim>正式发布 · Available Today</div>
