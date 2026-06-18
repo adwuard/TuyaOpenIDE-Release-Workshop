@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vibe Coding · AI 时代硬件开发的范式革命 · TuyaOpen IDE</title>
+<title>TuyaOpen IDE · 正式发布 & 功能速览 · Product Release & Walkthrough</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@300;400;500;600&family=Noto+Serif+SC:wght@300;400;500;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
@@ -724,12 +724,12 @@
       <div style="display:flex;flex-direction:column;gap:.6vh">
         <div style="font-family:var(--serif),var(--serif-zh);font-size:max(22px,1.8vw);font-weight:700;line-height:1.2">赖宣翰</div>
         <div style="font-family:var(--sans);font-size:max(16px,1.1vw);opacity:.75;line-height:1.4">涂鸦开发者生态负责人</div>
-        <div style="font-family:var(--mono);font-size:max(14px,.9vw);opacity:.5;letter-spacing:.1em">2026.05.29</div>
+        <div style="font-family:var(--mono);font-size:max(14px,.9vw);opacity:.5;letter-spacing:.1em">2026.06.18</div>
       </div>
     </div>
   </div>
   <div class="foot">
-    <div>30 分钟演讲 + 30 分钟 Workshop</div>
+    <div>Product Release · Feature Walkthrough · 正式发布 + 功能速览</div>
     <div>→ swipe / arrow keys</div>
   </div>
 </section>
@@ -738,7 +738,7 @@
 <section class="slide light">
   <div class="chrome">
     <div>行业现状 · The Gap</div>
-    <div>Act I · 02 / 21</div>
+    <div>Act I · 02 / 25</div>
   </div>
   <div class="frame" style="padding-top:6vh">
     <div class="kicker" data-anim>一个残酷的对比</div>
@@ -775,7 +775,7 @@
 <section class="slide light">
   <div class="chrome">
     <div>行业趋势 · Trends</div>
-    <div>Act I · 03 / 21</div>
+    <div>Act I · 03 / 25</div>
   </div>
   <div class="frame" style="padding-top:6vh">
     <div class="kicker" data-anim>三大不可逆趋势</div>
@@ -812,7 +812,7 @@
 <section class="slide light">
   <div class="chrome">
     <div>历史演进 · Evolution</div>
-    <div>Act I · 04 / 21</div>
+    <div>Act I · 04 / 25</div>
   </div>
   <div class="frame" style="padding-top:4vh">
     <div class="kicker" data-anim>硬件开发正处于"前夜"</div>
@@ -861,7 +861,7 @@
 <section class="slide light">
   <div class="chrome">
     <div>工具对比 · Comparison</div>
-    <div>Act I · 05 / 21</div>
+    <div>Act I · 05 / 25</div>
   </div>
   <div class="frame" style="padding-top:4vh">
     <div class="kicker" data-anim>现有工具的局限</div>
@@ -875,12 +875,14 @@
             <th style="text-align:center;padding:1.5vh 1vw;font-weight:600">Keil / IAR</th>
             <th style="text-align:center;padding:1.5vh 1vw;font-weight:600">Arduino IDE</th>
             <th style="text-align:center;padding:1.5vh 1vw;font-weight:600">PlatformIO</th>
+            <th style="text-align:center;padding:1.5vh 1vw;font-weight:600">STM32 CubeMX</th>
             <th style="text-align:center;padding:1.5vh 1vw;font-weight:700;background:linear-gradient(135deg,rgba(255,107,53,.1),rgba(33,150,243,.1))">TuyaOpen IDE</th>
           </tr>
         </thead>
         <tbody>
           <tr style="border-bottom:1px solid rgba(10,10,11,.08)">
             <td style="padding:1.5vh 1vw;font-weight:500">AI 原生</td>
+            <td style="text-align:center;padding:1.5vh 1vw;opacity:.5">—</td>
             <td style="text-align:center;padding:1.5vh 1vw;opacity:.5">—</td>
             <td style="text-align:center;padding:1.5vh 1vw;opacity:.5">—</td>
             <td style="text-align:center;padding:1.5vh 1vw;opacity:.5">—</td>
@@ -891,6 +893,7 @@
             <td style="text-align:center;padding:1.5vh 1vw;opacity:.6">仅固件</td>
             <td style="text-align:center;padding:1.5vh 1vw;opacity:.6">仅固件</td>
             <td style="text-align:center;padding:1.5vh 1vw;opacity:.6">仅固件</td>
+            <td style="text-align:center;padding:1.5vh 1vw;opacity:.6">仅固件</td>
             <td style="text-align:center;padding:1.5vh 1vw;color:#4caf50;font-weight:700">✓ 固件+云+App</td>
           </tr>
           <tr style="border-bottom:1px solid rgba(10,10,11,.08)">
@@ -898,21 +901,16 @@
             <td style="text-align:center;padding:1.5vh 1vw;color:#e53935">手动 · 复杂</td>
             <td style="text-align:center;padding:1.5vh 1vw;color:#ff9800">半自动</td>
             <td style="text-align:center;padding:1.5vh 1vw;color:#ff9800">半自动</td>
+            <td style="text-align:center;padding:1.5vh 1vw;color:#ff9800">半自动 · 图形配置</td>
             <td style="text-align:center;padding:1.5vh 1vw;color:#4caf50;font-weight:700">✓ 零配置</td>
           </tr>
-          <tr style="border-bottom:1px solid rgba(10,10,11,.08)">
+          <tr>
             <td style="padding:1.5vh 1vw;font-weight:500">云端集成</td>
             <td style="text-align:center;padding:1.5vh 1vw;opacity:.5">—</td>
             <td style="text-align:center;padding:1.5vh 1vw;opacity:.5">—</td>
             <td style="text-align:center;padding:1.5vh 1vw;opacity:.5">—</td>
+            <td style="text-align:center;padding:1.5vh 1vw;opacity:.5">—</td>
             <td style="text-align:center;padding:1.5vh 1vw;color:#4caf50;font-weight:700">✓ 内置涂鸦云</td>
-          </tr>
-          <tr>
-            <td style="padding:1.5vh 1vw;font-weight:500">开源</td>
-            <td style="text-align:center;padding:1.5vh 1vw;color:#e53935">闭源</td>
-            <td style="text-align:center;padding:1.5vh 1vw;color:#4caf50">✓</td>
-            <td style="text-align:center;padding:1.5vh 1vw;color:#4caf50">✓</td>
-            <td style="text-align:center;padding:1.5vh 1vw;color:#4caf50;font-weight:700">✓ Apache 2.0</td>
           </tr>
         </tbody>
       </table>
@@ -928,7 +926,7 @@
 <section class="slide hero dark">
   <div class="chrome">
     <div>第二幕 · 痛点剖析</div>
-    <div>Act II · 06 / 21</div>
+    <div>Act II · 06 / 25</div>
   </div>
   <div class="frame" style="display:grid; gap:6vh; align-content:center; min-height:80vh">
     <div class="kicker" data-anim>Act II</div>
@@ -947,7 +945,7 @@
 <section class="slide dark">
   <div class="chrome">
     <div>痛点 · Pain Points</div>
-    <div>Act II · 07 / 21</div>
+    <div>Act II · 07 / 25</div>
   </div>
   <div class="frame" style="padding-top:4vh">
     <div class="kicker" data-anim>环境与 AI 的双重困境</div>
@@ -981,7 +979,7 @@
 <section class="slide dark">
   <div class="chrome">
     <div>痛点 · Pain Points</div>
-    <div>Act II · 08 / 21</div>
+    <div>Act II · 08 / 25</div>
   </div>
   <div class="frame" style="padding-top:4vh">
     <div class="kicker" data-anim>工具碎片化与能力断层</div>
@@ -1016,7 +1014,7 @@
   <canvas id="firework-canvas" style="position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;filter:blur(5px)"></canvas>
   <div class="chrome" style="position:relative;z-index:2">
     <div>第三幕 · 产品发布</div>
-    <div>Act III · 09 / 21</div>
+    <div>Act III · 09 / 25</div>
   </div>
   <div class="frame" style="display:grid; gap:5vh; align-content:center; min-height:76vh; padding-top:2vh;position:relative;z-index:2">
     <div class="kicker" data-anim>Act III · Our Answer</div>
@@ -1038,7 +1036,7 @@
 <section class="slide dark">
   <div class="chrome">
     <div>突破 1 · Vibe Coding</div>
-    <div>Act III · 10 / 21</div>
+    <div>Act III · 10 / 25</div>
   </div>
   <div class="frame" style="padding-top:4vh">
     <div class="kicker" data-anim>AI 原生的开发体验</div>
@@ -1084,7 +1082,7 @@
 <section class="slide light">
   <div class="chrome">
     <div>突破 2 · All-in-One</div>
-    <div>Act III · 11 / 21</div>
+    <div>Act III · 11 / 25</div>
   </div>
   <div class="frame" style="padding-top:4vh">
     <div class="kicker" data-anim>App / Cloud / Hardware 三合一</div>
@@ -1130,7 +1128,7 @@
 <section class="slide dark">
   <div class="chrome">
     <div>突破 3 · Ecosystem</div>
-    <div>Act III · 12 / 21</div>
+    <div>Act III · 12 / 25</div>
   </div>
   <div class="frame" style="padding-top:2vh">
     <div style="display:grid;grid-template-columns:7fr 5fr;gap:2vw;align-items:center">
@@ -1173,7 +1171,7 @@
       <div class="stat-card accent-top" style="padding:1vh .8vw" data-anim>
         <div class="stat-label">TuyaOpen SDK</div>
         <div class="stat-nb" style="font-size:2.8vw">Apache 2.0</div>
-        <div class="stat-note">开源</div>
+        <div class="stat-note">框架 SDK 开源</div>
       </div>
     </div>
   </div>
@@ -1183,72 +1181,72 @@
   </div>
 </section>
 
-<!-- ===== 13 · Transition: What You'll Build ===== -->
+<!-- ===== 13 · Transition: Feature Walkthrough Preview ===== -->
 <section class="slide hero dark">
   <div class="chrome">
-    <div>预览 · What You'll Build</div>
-    <div>Act III → IV · 13 / 21</div>
+    <div>预览 · Feature Walkthrough</div>
+    <div>Act III → IV · 13 / 25</div>
   </div>
   <div class="frame" style="display:grid; gap:4vh; align-content:center; min-height:76vh">
-    <div class="kicker" data-anim>接下来 30 分钟</div>
-    <h1 class="h-hero" style="font-size:6.5vw" data-anim>亲手做出你的<br/>第一个智能设备</h1>
-    <p class="lead" style="max-width:60vw" data-anim>从零开始，一句话让 AI 帮你完成一个完整的三路联网开关。</p>
+    <div class="kicker" data-anim>接下来</div>
+    <h1 class="h-hero" style="font-size:6.5vw" data-anim>带你速览<br/>全栈功能</h1>
+    <p class="lead" style="max-width:60vw" data-anim>从一句话生成固件，到云端 Agent 与小程序面板 —— 一个 IDE 覆盖智能硬件全链路。</p>
     <div class="grid-3" style="margin-top:3vh">
       <div class="stat-card" data-anim>
-        <div class="stat-label">Step 1</div>
-        <div class="stat-nb" style="font-size:3.2vw">安装 & 建项目</div>
-        <div class="stat-note">5 分钟：VS Code 扩展 + 选板 + 创建项目</div>
+        <div class="stat-label">Firmware</div>
+        <div class="stat-nb" style="font-size:3.2vw">固件 · Vibe Coding</div>
+        <div class="stat-note">自然语言生成、编译、烧录、闭环调试</div>
       </div>
       <div class="stat-card" data-anim>
-        <div class="stat-label">Step 2</div>
-        <div class="stat-nb" style="font-size:3.2vw">Vibe Coding</div>
-        <div class="stat-note">10 分钟：一句话生成代码、编译、烧录</div>
+        <div class="stat-label">Cloud · Agent</div>
+        <div class="stat-nb" style="font-size:3.2vw">云端 / 智能体</div>
+        <div class="stat-note">绑定产品、定义 DP、创建 AI Agent 与工作流</div>
       </div>
       <div class="stat-card accent-top" data-anim>
-        <div class="stat-label">Step 3</div>
-        <div class="stat-nb" style="font-size:3.2vw">手机控制设备</div>
-        <div class="stat-note">15 分钟：配网上云、App 操控你的开关</div>
+        <div class="stat-label">Mini App</div>
+        <div class="stat-nb" style="font-size:3.2vw">小程序面板</div>
+        <div class="stat-note">构建、调试、上传 App 控制面板</div>
       </div>
     </div>
   </div>
   <div class="foot">
-    <div>30 min · Step by Step · 人人都能完成</div>
+    <div>Firmware · Cloud · Agent · Mini App — 全栈一体</div>
     <div>— · —</div>
   </div>
 </section>
 
-<!-- ===== 14 · Chapter: Workshop ===== -->
+<!-- ===== 14 · Chapter: Feature Walkthrough ===== -->
 <section class="slide hero dark">
   <div class="chrome">
-    <div>第四幕 · Workshop</div>
-    <div>Act IV · 14 / 21</div>
+    <div>第四幕 · 功能速览</div>
+    <div>Act IV · 14 / 25</div>
   </div>
   <div class="frame" style="display:grid; gap:6vh; align-content:center; min-height:80vh">
-    <div class="kicker" data-anim>Act IV · Hands-on</div>
-    <h1 class="h-hero" style="font-size:7.5vw" data-anim>Workshop</h1>
+    <div class="kicker" data-anim>Act IV · Feature Walkthrough</div>
+    <h1 class="h-hero" style="font-size:7.5vw" data-anim>功能速览</h1>
     <p class="lead" style="max-width:60vw" data-anim>
-      耳听为虚，眼见为实。30 分钟内，亲手做出你的第一个智能硬件。
+      耳听为虚，眼见为实。带你逐一走过 TuyaOpen IDE 的核心功能。
     </p>
     <p class="lead" style="max-width:60vw;opacity:.7" data-anim>
-      30 min · Step by Step · 人人都能完成
+      界面总览 · 固件 Vibe Coding · 云端 Agent · 小程序面板
     </p>
   </div>
   <div class="foot">
-    <div>30 min · Step by Step · 人人都能完成</div>
+    <div>一个 IDE，覆盖固件 · 云端 · 应用</div>
     <div>— · —</div>
   </div>
 </section>
 
-<!-- ===== 13 · Workshop Checklist ===== -->
+<!-- ===== 15 · Quick Start Checklist ===== -->
 <section class="slide light">
   <div class="chrome">
-    <div>Workshop · Prep</div>
-    <div>Act IV · 15 / 21</div>
+    <div>快速开始 · Quick Start</div>
+    <div>Act IV · 15 / 25</div>
   </div>
   <div class="frame" style="padding-top:4vh">
-    <div class="kicker" data-anim>5 分钟准备工作</div>
-    <h2 class="h-xl" data-anim>准备工作</h2>
-    <p class="lead" style="margin-bottom:5vh" data-anim>确认以下四项，然后开始。</p>
+    <div class="kicker" data-anim>四步即可上手</div>
+    <h2 class="h-xl" data-anim>快速开始</h2>
+    <p class="lead" style="margin-bottom:5vh" data-anim>准备好这四项，即可开始使用 TuyaOpen IDE。</p>
     <div class="pipeline" data-cols="4" style="margin-top:4vh">
       <div class="step accent-top" data-anim>
         <div class="step-nb">01</div>
@@ -1297,7 +1295,7 @@
 <section class="slide light" id="ide-overview-slide">
   <div class="chrome">
     <div>IDE 界面总览</div>
-    <div>Act IV · Workshop</div>
+    <div>Act IV · 界面总览</div>
   </div>
   <div class="frame" style="padding-top:3vh">
     <div class="kicker" data-anim>TuyaOpen IDE 界面导览</div>
@@ -1375,10 +1373,10 @@
 <section class="slide dark">
   <div class="chrome">
     <div>Step 1 · Create</div>
-    <div>Act IV · 16 / 21</div>
+    <div>Act IV · 16 / 25</div>
   </div>
   <div class="frame" style="padding-top:2vh">
-    <div class="kicker" data-anim>3 分钟</div>
+    <div class="kicker" data-anim>第一步</div>
     <h2 class="h-xl" style="font-size:clamp(28px,4.2vw,72px)" data-anim>创建项目</h2>
     <p class="lead" style="margin-bottom:2vh" data-anim>SDK 自动安装，环境零配置。</p>
     <div style="margin-bottom:1.5vh;padding:1vh 1.2vw;background:rgba(10,10,11,.05);border-left:3px solid var(--ink);font-size:clamp(11px,1vw,14px);line-height:1.4" data-anim>
@@ -1432,10 +1430,10 @@
 <section class="slide light">
   <div class="chrome">
     <div>Step 2 · Vibe Coding</div>
-    <div>Act IV · 17 / 21</div>
+    <div>Act IV · 17 / 25</div>
   </div>
   <div class="frame" style="padding-top:2vh">
-    <div class="kicker" data-anim>核心环节 · 10 分钟</div>
+    <div class="kicker" data-anim>核心环节</div>
     <h2 class="h-xl" style="font-size:clamp(28px,4.2vw,72px)" data-anim>一行命令，一个产品</h2>
     <p class="lead" style="margin-bottom:2vh" data-anim>打开 AI Coding Agent 对话面板</p>
     <div class="pipeline-section">
@@ -1463,7 +1461,7 @@
 <section class="slide light">
   <div class="chrome">
     <div>更多玩法 · Prompts</div>
-    <div>Act IV · 18 / 21</div>
+    <div>Act IV · 18 / 25</div>
   </div>
   <div class="frame" style="padding-top:2vh">
     <div class="kicker" data-anim>不止一行命令</div>
@@ -1510,12 +1508,12 @@
         <div class="step-title" style="font-size:clamp(12px,1.1vw,16px)">🧩 芯片选型</div>
         <div class="step-desc" style="opacity:.85;line-height:1.5;font-size:clamp(11px,.95vw,14px)">"做低功耗门锁选哪颗芯片合适？"<br>"T2 和 T3 性能差异对比？"</div>
       </div>
-      <div class="step" style="padding:1vh 1vw;opacity:.55" data-anim>
-        <div class="step-title" style="font-size:clamp(12px,1.1vw,16px)">📱 App 面板 <span style="font-size:.65em;padding:2px 8px;background:#ff6b35;color:#fff;border-radius:3px;vertical-align:middle">即将上线</span></div>
+      <div class="step" style="padding:1vh 1vw" data-anim>
+        <div class="step-title" style="font-size:clamp(12px,1.1vw,16px)">📱 App 面板 <span style="font-size:.65em;padding:2px 8px;background:#4caf50;color:#fff;border-radius:3px;vertical-align:middle">已上线</span></div>
         <div class="step-desc" style="opacity:.85;line-height:1.5;font-size:clamp(11px,.95vw,14px)">"定制三路开关控制面板"<br>"面板加能耗统计图表"</div>
       </div>
-      <div class="step" style="padding:1vh 1vw;opacity:.55" data-anim>
-        <div class="step-title" style="font-size:clamp(12px,1.1vw,16px)">🤖 云端 AI Agent <span style="font-size:.65em;padding:2px 8px;background:#ff6b35;color:#fff;border-radius:3px;vertical-align:middle">即将上线</span></div>
+      <div class="step" style="padding:1vh 1vw" data-anim>
+        <div class="step-title" style="font-size:clamp(12px,1.1vw,16px)">🤖 云端 AI Agent <span style="font-size:.65em;padding:2px 8px;background:#4caf50;color:#fff;border-radius:3px;vertical-align:middle">已上线</span></div>
         <div class="step-desc" style="opacity:.85;line-height:1.5;font-size:clamp(11px,.95vw,14px)">"创建 Agent 工作流"<br>"创建硬件设备控制 MCP 能力"</div>
       </div>
     </div>
@@ -1526,31 +1524,177 @@
   </div>
 </section>
 
-<!-- ===== 17 · Workshop Result ===== -->
+<!-- ===== 19 · Concept: Three-End Project Model ===== -->
+<section class="slide dark">
+  <div class="chrome">
+    <div>功能速览 · 三端模型</div>
+    <div>Act IV · 19 / 25</div>
+  </div>
+  <div class="frame" style="padding-top:4vh">
+    <div class="kicker" data-anim>一个项目，三个端</div>
+    <h2 class="h-xl" data-anim>三端项目模型</h2>
+    <p class="lead" style="margin-bottom:3.5vh" data-anim>一个 TuyaOpen 项目 = <strong>固件</strong> + <strong>云端产品</strong> + <strong>小程序面板</strong>，三端通过 DP 对齐协同。</p>
+    <div class="pipeline" data-cols="3" style="margin-top:2vh">
+      <div class="step accent-top" data-anim>
+        <div class="step-nb" style="color:#2196f3">固件端 · embedded</div>
+        <div class="step-title">运行在板卡上</div>
+        <div class="step-desc">C 代码读传感器、驱动输出、与云端通信。位于 <code>source/embedded</code>。</div>
+      </div>
+      <div class="step accent-top" data-anim>
+        <div class="step-nb" style="color:#9c27b0">云端产品 · Cloud</div>
+        <div class="step-title">设备能力契约</div>
+        <div class="step-desc">声明设备的 DP（功能点），由 PID 标识。是固件与面板共同遵守的契约。</div>
+      </div>
+      <div class="step accent-top" data-anim>
+        <div class="step-nb" style="color:#ff6b35">小程序端 · 面板</div>
+        <div class="step-title">用户控制界面</div>
+        <div class="step-desc">App 中的控制面板，把控件绑定到同样的 DP。位于 <code>source/miniapp</code>。</div>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:3vh;font-size:clamp(13px,1.2vw,17px)" data-anim>
+      <strong>关键：</strong>固件与面板从不直接通信 —— 所有值都经云端、以 DP 为键流转。<strong>让三端 DP 的名称与类型保持一致，是最重要的一件事。</strong>
+      <span class="cite">推荐顺序　①&nbsp;新建项目　→　②&nbsp;定义云端产品　→　③&nbsp;开发固件　→　④&nbsp;开发面板</span>
+    </div>
+  </div>
+  <div class="foot">
+    <div>三端 DP 对齐 — 项目才能端到端跑通</div>
+    <div>— · —</div>
+  </div>
+</section>
+
+<!-- ===== 20 · Feature: Cloud IoT / Agent Development ===== -->
+<section class="slide light">
+  <div class="chrome">
+    <div>功能速览 · 云端 IoT / Agent</div>
+    <div>Act IV · 20 / 25</div>
+  </div>
+  <div class="frame" style="padding-top:3vh">
+    <div class="kicker" data-anim>云端 IoT / Agent 开发</div>
+    <h2 class="h-xl" style="font-size:clamp(28px,4.2vw,72px)" data-anim>给产品装上<span style="background:linear-gradient(135deg,#2196f3,#9c27b0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">云端大脑</span></h2>
+    <p class="lead" style="margin-bottom:2.5vh" data-anim>绑定云端产品、查看 DP 定义，并创建为产品赋予云端智能的 AI Agent。</p>
+    <div style="display:grid;grid-template-columns:7fr 5fr;gap:2vw;align-items:center;margin-top:1vh">
+      <figure class="frame-img fit-contain" style="height:48vh;background:#fff" data-anim>
+        <img src="images/dp-design.png" alt="云端 IoT / Agent 开发" style="cursor:pointer" onclick="var o=document.createElement('div');o.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;cursor:pointer';o.onclick=function(){o.remove()};var i=document.createElement('img');i.src=this.src;i.style.cssText='max-width:92vw;max-height:92vh;object-fit:contain;border-radius:6px;box-shadow:0 4px 40px rgba(0,0,0,.5)';o.appendChild(i);document.body.appendChild(o)">
+      </figure>
+      <div style="display:flex;flex-direction:column;gap:1.4vh">
+        <div class="step accent-top" data-anim>
+          <div class="step-title">① 云端产品</div>
+          <div class="step-desc">绑定或创建 Tuya 产品，查看 PID 与 DP 表格（CODE / NAME / TYPE / ACCESS / RANGE）。AI Coding 对这些上下文有感知。</div>
+        </div>
+        <div class="step accent-top" data-anim>
+          <div class="step-title">② 智能体开发</div>
+          <div class="step-desc">为产品创建并绑定 AI Agent —— 需先绑定产品才解锁。智能体先开发发布，再绑定到产品。</div>
+        </div>
+        <div class="step accent-top" data-anim>
+          <div class="step-title">③ 两种模式</div>
+          <div class="step-desc"><strong>智能体</strong>：单模型输入输出 + 技能调用<br><strong>工作流</strong>：多模态图形化编排</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="foot">
+    <div>产品是基础 — 没有产品就无法创建 Agent</div>
+    <div>— · —</div>
+  </div>
+</section>
+
+<!-- ===== 21 · Feature: Agent Workflow Development ===== -->
+<section class="slide dark">
+  <div class="chrome">
+    <div>功能速览 · Agent 工作流</div>
+    <div>Act IV · 21 / 25</div>
+  </div>
+  <div class="frame" style="padding-top:3vh">
+    <div class="kicker" data-anim>Agent · 工作流编排</div>
+    <h2 class="h-xl" style="font-size:clamp(28px,4.2vw,72px)" data-anim>可视化编排<span style="background:linear-gradient(135deg,#ff6b35,#e91e63,#9c27b0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">智能体工作流</span></h2>
+    <p class="lead" style="margin-bottom:2.5vh" data-anim>把意图识别、分类、控制与技能调用连成一张可执行的工作流图。</p>
+    <div style="display:grid;grid-template-columns:7fr 5fr;gap:2vw;align-items:center;margin-top:1vh">
+      <figure class="frame-img fit-contain" style="height:48vh;background:#fff" data-anim>
+        <img src="images/agent-design.png" alt="Agent 工作流编排" style="cursor:pointer" onclick="var o=document.createElement('div');o.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;cursor:pointer';o.onclick=function(){o.remove()};var i=document.createElement('img');i.src=this.src;i.style.cssText='max-width:92vw;max-height:92vh;object-fit:contain;border-radius:6px;box-shadow:0 4px 40px rgba(0,0,0,.5)';o.appendChild(i);document.body.appendChild(o)">
+      </figure>
+      <div style="display:flex;flex-direction:column;gap:1.4vh">
+        <div class="step accent-top" data-anim>
+          <div class="step-title">① 图形化节点</div>
+          <div class="step-desc">开始 → 意图识别 → 分类 → 处理节点，拖拽连线即可编排，无需写胶水代码。</div>
+        </div>
+        <div class="step accent-top" data-anim>
+          <div class="step-title">② 多模态集成</div>
+          <div class="step-desc">把控制智能体、智能体调用与技能调用，集成在同一张工作流图里。</div>
+        </div>
+        <div class="step accent-top" data-anim>
+          <div class="step-title">③ 何时用工作流</div>
+          <div class="step-desc">简单问答用「智能体」单模型；多步骤、带分支的复杂逻辑用「工作流」编排。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="foot">
+    <div>从单模型问答，到可编排的智能体工作流</div>
+    <div>— · —</div>
+  </div>
+</section>
+
+<!-- ===== 22 · Feature: Mini App Panel Development ===== -->
+<section class="slide light">
+  <div class="chrome">
+    <div>功能速览 · 小程序面板</div>
+    <div>Act IV · 22 / 25</div>
+  </div>
+  <div class="frame" style="padding-top:3vh">
+    <div class="kicker" data-anim>小程序面板开发</div>
+    <h2 class="h-xl" style="font-size:clamp(28px,4.2vw,72px)" data-anim>三步做出 <span style="background:linear-gradient(135deg,#2196f3,#00bcd4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">App 控制面板</span></h2>
+    <p class="lead" style="margin-bottom:2.5vh" data-anim>在 IDE 内构建、调试并上传面板 —— 用户在智能生活 App 里操作设备的界面。</p>
+    <div style="display:grid;grid-template-columns:7fr 5fr;gap:2vw;align-items:center;margin-top:1vh">
+      <figure class="frame-img fit-contain" style="height:48vh;background:#fff" data-anim>
+        <img src="images/mini-app.png" alt="小程序面板开发" style="cursor:pointer" onclick="var o=document.createElement('div');o.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;cursor:pointer';o.onclick=function(){o.remove()};var i=document.createElement('img');i.src=this.src;i.style.cssText='max-width:92vw;max-height:92vh;object-fit:contain;border-radius:6px;box-shadow:0 4px 40px rgba(0,0,0,.5)';o.appendChild(i);document.body.appendChild(o)">
+      </figure>
+      <div style="display:flex;flex-direction:column;gap:1.4vh">
+        <div class="step accent-top" data-anim>
+          <div class="step-title">① 账号与产品</div>
+          <div class="step-desc">登录账号、绑定产品（DP 数据模型）、绑定小程序 —— 三项就绪才解锁调试。</div>
+        </div>
+        <div class="step accent-top" data-anim>
+          <div class="step-title">② 实时调试</div>
+          <div class="step-desc">Render Panel 渲染到手机预览，Virtual device 模拟硬件，DP Traffic 观察往返数据。</div>
+        </div>
+        <div class="step accent-top" data-anim>
+          <div class="step-title">③ 打包上传</div>
+          <div class="step-desc">设置版本号，Package &amp; Upload 发布开发版本到开发者平台。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="foot">
+    <div>Virtual device 先打磨界面，Real device 再做实测</div>
+    <div>— · —</div>
+  </div>
+</section>
+
+<!-- ===== 23 · Summary ===== -->
 <section class="slide hero light">
   <div class="chrome">
-    <div>Workshop · Summary</div>
-    <div>Act IV · 19 / 21</div>
+    <div>全栈闭环 · Summary</div>
+    <div>Act IV · 23 / 25</div>
   </div>
   <div class="frame" style="padding-top:6vh">
-    <div class="kicker" data-anim>Workshop 成果</div>
-    <h2 class="h-xl" data-anim>30 分钟，从零到产品</h2>
-    <p class="lead" style="margin-bottom:4vh" data-anim>你刚刚用一句话完成了一个完整的智能硬件。但这只是开始。</p>
+    <div class="kicker" data-anim>一个 IDE，全栈闭环</div>
+    <h2 class="h-xl" data-anim>从一句话到完整产品</h2>
+    <p class="lead" style="margin-bottom:4vh" data-anim>固件、云端产品、AI Agent、小程序面板 —— 三端在一个 IDE 里对齐贯通。</p>
     <div class="grid-3" style="margin-top:2vh">
       <div class="stat-card" data-anim>
-        <div class="stat-label">Time</div>
-        <div class="stat-nb" style="font-size:5vw">30 <span class="stat-unit">min</span></div>
-        <div class="stat-note">从零到成品设备</div>
+        <div class="stat-label">Full-Stack</div>
+        <div class="stat-nb" style="font-size:5vw">三端</div>
+        <div class="stat-note">固件 + 云端 + 小程序，DP 对齐贯通</div>
       </div>
       <div class="stat-card" data-anim>
         <div class="stat-label">AI-Powered</div>
-        <div class="stat-nb" style="font-size:5vw">全栈</div>
-        <div class="stat-note">固件 + 云 + App 一个人搞定</div>
+        <div class="stat-nb" style="font-size:5vw">一句话</div>
+        <div class="stat-note">生成 → 编译 → 烧录 → 闭环调试</div>
       </div>
       <div class="stat-card accent-top" data-anim>
-        <div class="stat-label">Open Source</div>
+        <div class="stat-label">Open Source SDK</div>
         <div class="stat-nb" style="font-size:4.2vw">Apache 2.0</div>
-        <div class="stat-note">完全开源，属于社区</div>
+        <div class="stat-note">TuyaOpen 框架 SDK 开源 · 属于社区</div>
       </div>
     </div>
     <div style="margin-top:4vh;padding:2.5vh 2.5vw;background:rgba(10,10,11,.03);border-radius:8px" data-anim>
@@ -1572,7 +1716,7 @@
 <section class="slide hero dark">
   <div class="chrome">
     <div>愿景 · Vision</div>
-    <div>20 / 21</div>
+    <div>24 / 25</div>
   </div>
   <div class="frame" style="display:grid; gap:4vh; align-content:center; min-height:80vh">
     <div class="kicker" data-anim>Our Vision</div>
@@ -1591,7 +1735,7 @@
 <section class="slide light">
   <div class="chrome">
     <div>TuyaOpen IDE · Available Now</div>
-    <div>21 / 21</div>
+    <div>25 / 25</div>
   </div>
   <div class="frame" style="padding-top:6vh">
     <div class="kicker" data-anim>正式发布 · Available Today</div>
